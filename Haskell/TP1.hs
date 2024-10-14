@@ -54,7 +54,7 @@ adjacent roadmap city =
 -}
 
 -- Talvez tenha de ser alterada no futuro, should work for now though
--- Function that returns the sum of all individual distances in a path between two cities in a Just value, if all the consecutive pairs of cities are directly connected by roads. Otherwise, it returns a Nothing.
+-- Function that returns the sum of all individual distances in a path between two cities in a Just value, if all the consecutive pairs of cities are directly connected by roads. Otherwise, it returns a Nothing
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance _ [] = Just 0
 pathDistance _ [_] = Just 0
@@ -63,8 +63,23 @@ pathDistance roadmap (city1:city2:xs) =
                 Just d -> fmap (d +) (pathDistance roadmap (city2:xs))
                 Nothing -> Nothing
 
+-- May also need redoing in the future
+-- Helper function to count occurrences of each city
+groupCities :: [(City, Int)] -> [(City, Int)]
+groupCities [] = []
+groupCities ((city, _):xs) =
+    let count = 1 + length [c | (c, _) <- xs, c == city]
+        remaining = filter (\(c, _) -> c /= city) xs
+    in (city, count) : groupCities remaining
+
+-- May also need redoing in the future
+-- Function that returns the names of the cities with the highest number of roads connecting to them
 rome :: RoadMap -> [City]
-rome = undefined
+rome roadmap =
+    let connections = [(city, 1) | (c1, c2, _) <- roadmap, city <- [c1, c2]]
+        groupedConnections = groupCities connections
+        maxDegree = maximum (map snd groupedConnections)
+    in [city | (city, degree) <- groupedConnections, degree == maxDegree]
 
 isStronglyConnected :: RoadMap -> Bool
 isStronglyConnected = undefined

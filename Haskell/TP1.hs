@@ -23,13 +23,18 @@ removeDuplicates (x:xs)
 cities :: RoadMap -> [City]
 cities roadmap = removeDuplicates [city | (city1, city2, _) <- roadmap, city <- [city1, city2]]
 
--- Function that returns a boolean indicating whether two cities are linked directly, no matter the direction
+-- Function that returns a boolean indicating whether two cities are linked directly, independent of the direction of the connection
 areAdjacent :: RoadMap -> City -> City -> Bool
 areAdjacent [] _ _ = False
 areAdjacent ((x, y, _):xs) city1 city2 = (x == city1 && y == city2) || (x == city2 && y == city1) || areAdjacent xs city1 city2
 
+-- Function that returns a Just value with the distance between two cities connected directly, or Nothing otherwise, independent of the direction of the connection
 distance :: RoadMap -> City -> City -> Maybe Distance
-distance = undefined
+distance [] _ _ = Nothing
+distance ((x, y, d):xs) city1 city2 
+        | x == city1 && y == city2 = Just d
+        | x == city2 && y == city1 = Just d
+        | otherwise = distance xs city1 city2
 
 adjacent :: RoadMap -> City -> [(City,Distance)]
 adjacent = undefined

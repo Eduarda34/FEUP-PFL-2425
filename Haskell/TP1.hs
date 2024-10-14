@@ -15,7 +15,7 @@ type RoadMap = [(City,City,Distance)]
 -- Helper function to check for duplicates in the cities function list and remove them if they exist
 removeDuplicates :: Eq a => [a] -> [a]
 removeDuplicates [] = []
-removeDuplicates (x:xs) 
+removeDuplicates (x:xs)
         | x `elem` xs = removeDuplicates xs
         | otherwise = x : removeDuplicates xs
 
@@ -23,8 +23,10 @@ removeDuplicates (x:xs)
 cities :: RoadMap -> [City]
 cities roadmap = removeDuplicates [city | (city1, city2, _) <- roadmap, city <- [city1, city2]]
 
+-- Function that returns a boolean indicating whether two cities are linked directly, no matter the direction
 areAdjacent :: RoadMap -> City -> City -> Bool
-areAdjacent = undefined
+areAdjacent [] _ _ = False
+areAdjacent ((x, y, _):xs) city1 city2 = (x == city1 && y == city2) || (x == city2 && y == city1) || areAdjacent xs city1 city2
 
 distance :: RoadMap -> City -> City -> Maybe Distance
 distance = undefined

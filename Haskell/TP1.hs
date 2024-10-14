@@ -53,8 +53,15 @@ adjacent roadmap city =
                       areAdjacent roadmap city otherCity]
 -}
 
+-- Talvez tenha de ser alterada no futuro, should work for now though
+-- Function that returns the sum of all individual distances in a path between two cities in a Just value, if all the consecutive pairs of cities are directly connected by roads. Otherwise, it returns a Nothing.
 pathDistance :: RoadMap -> Path -> Maybe Distance
-pathDistance = undefined
+pathDistance _ [] = Just 0
+pathDistance _ [_] = Just 0
+pathDistance roadmap (city1:city2:xs) = 
+        case distance roadmap city1 city2 of
+                Just d -> fmap (d +) (pathDistance roadmap (city2:xs))
+                Nothing -> Nothing
 
 rome :: RoadMap -> [City]
 rome = undefined

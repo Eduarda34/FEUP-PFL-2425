@@ -36,8 +36,22 @@ distance ((x, y, d):xs) city1 city2
         | x == city2 && y == city1 = Just d
         | otherwise = distance xs city1 city2
 
+-- Function that returns the cities adjacent to a particular city and the distance to them 
 adjacent :: RoadMap -> City -> [(City,Distance)]
-adjacent = undefined
+adjacent [] _ = [] 
+adjacent ((x, y, d):xs) city 
+        | x == city = (y, d) : adjacent xs city
+        | y == city = (x, d) : adjacent xs city
+        | otherwise = adjacent xs city
+
+-- OU
+{-
+adjacent :: RoadMap -> City -> [(City,Distance)]
+adjacent roadmap city = 
+    [(otherCity, d) | (c1, c2, d) <- roadmap, 
+                      let otherCity = if c1 == city then c2 else c1,
+                      areAdjacent roadmap city otherCity]
+-}
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance = undefined

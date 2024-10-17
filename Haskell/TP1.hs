@@ -12,37 +12,26 @@ type Distance = Int
 
 type RoadMap = [(City,City,Distance)]
 
--- Helper function to check for duplicates in the cities function list and remove them if they exist
-removeDuplicates :: Eq a => [a] -> [a]
-removeDuplicates [] = []
-removeDuplicates (x:xs)
-        | x `elem` xs = removeDuplicates xs
-        | otherwise = x : removeDuplicates xs
-
 -- Function that returns all unique cities from the provided RoadMap
 cities :: RoadMap -> [City]
-cities roadmap = removeDuplicates [city | (city1, city2, _) <- roadmap, city <- [city1, city2]]
+cities roadmap = Data.List.nub [city | (city1, city2, _) <- roadmap, city <- [city1, city2]]
 
--- Function that returns a boolean indicating whether two cities are linked directly, independent of the direction of the connection
+-- Function that returns a boolean indicating whether two cities are linked directly
 areAdjacent :: RoadMap -> City -> City -> Bool
-areAdjacent [] _ _ = False
-areAdjacent ((x, y, _):xs) city1 city2 = (x == city1 && y == city2) || (x == city2 && y == city1) || areAdjacent xs city1 city2
+areAdjacent roadmap city1 city2 = any matches roadmap
+    where matches (x, y, _) = (x == city1 && y == city2) || (x == city2 && y == city1)
 
--- Function that returns a Just value with the distance between two cities connected directly, or Nothing otherwise, independent of the direction of the connection
+-- Function that returns a Just value with the distance between two cities connected directly, or Nothing otherwise
 distance :: RoadMap -> City -> City -> Maybe Distance
-distance [] _ _ = Nothing
-distance ((x, y, d):xs) city1 city2 
-        | x == city1 && y == city2 = Just d
-        | x == city2 && y == city1 = Just d
-        | otherwise = distance xs city1 city2
+distance roadmap city1 city2 = 
+    case Data.List.find matches roadmap of
+        Just (_, _, d) -> Just d
+        Nothing -> Nothing
+    where matches (x, y, _) = (x == city1 && y == city2) || (x == city2 && y == city1)
 
 -- Function that returns the cities adjacent to a particular city and the distance to them 
-adjacent :: RoadMap -> City -> [(City,Distance)]
-adjacent [] _ = [] 
-adjacent ((x, y, d):xs) city 
-        | x == city = (y, d) : adjacent xs city
-        | y == city = (x, d) : adjacent xs city
-        | otherwise = adjacent xs city
+adjacent :: RoadMap -> City -> [(City, Distance)]
+adjacent roadmap city = [(y, d) | (x, y, d) <- roadmap, x == city] ++ [(x, d) | (y, x, d) <- roadmap, y == city]
 
 -- OU
 {-
@@ -59,40 +48,23 @@ pathDistance _ [] = Just 0
 pathDistance _ [_] = Just 0
 pathDistance roadmap (city1:city2:xs) = 
         case distance roadmap city1 city2 of
-                Just d -> fmap (d +) (pathDistance roadmap (city2:xs))
+                Just d -> (+ d) <$> pathDistance roadmap (city2:xs)
                 Nothing -> Nothing
 
--- May also need redoing in the future
--- Helper function to count occurrences of each city
-groupCities :: [(City, Int)] -> [(City, Int)]
-groupCities [] = []
-groupCities ((city, _):xs) =
-    let count = 1 + length [c | (c, _) <- xs, c == city]
-        remaining = filter (\(c, _) -> c /= city) xs
-    in (city, count) : groupCities remaining
-
--- May also need redoing in the future, complexity O(n^2)
--- Function that returns the names of the cities with the highest number of roads connecting to them
-rome :: RoadMap -> [City]
-rome roadmap =
-    let connections = [(city, 1) | (c1, c2, _) <- roadmap, city <- [c1, c2]]
-        groupedConnections = groupCities connections
-        maxDegree = maximum (map snd groupedConnections)
-    in [city | (city, degree) <- groupedConnections, degree == maxDegree]
-
--- OU (versão mais eficiente, complexity O(m log m) ou O(n log n))
-{-
+-- Function that returns the names of the cities with the highest number of roads connecting to them, complexity O(n log n)
 rome :: RoadMap -> [City]
 rome roadmap =
     let allCities = [city | (c1, c2, _) <- roadmap, city <- [c1, c2]]
-        groupedCities = List.group $ List.sort allCities
+        groupedCities = Data.List.group $ Data.List.sort allCities
         cityCounts = [(head group, length group) | group <- groupedCities]
         maxDegree = maximum (map snd cityCounts)
     in [city | (city, degree) <- cityCounts, degree == maxDegree]
--}
 
+-- Function that returns a boolean indicating whether all the cities in the graph are connected in the roadmap 
 isStronglyConnected :: RoadMap -> Bool
-isStronglyConnected = undefined
+isStronglyConnected roadmap =
+    let allCities = Data.List.nub [c | (c1, c2, _) <- roadmap, c <- [c1, c2]]
+    in all (\city -> length (adjacent roadmap city) == length allCities - 1) allCities
 
 shortestPath :: RoadMap -> City -> City -> [Path]
 shortestPath = undefined

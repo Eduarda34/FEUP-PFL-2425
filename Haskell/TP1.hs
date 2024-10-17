@@ -1,4 +1,4 @@
---import qualified Data.List
+import qualified Data.List
 --import qualified Data.Array
 --import qualified Data.Bits
 
@@ -53,8 +53,7 @@ adjacent roadmap city =
                       areAdjacent roadmap city otherCity]
 -}
 
--- Talvez tenha de ser alterada no futuro, should work for now though
--- Function that returns the sum of all individual distances in a path between two cities in a Just value, if all the consecutive pairs of cities are directly connected by roads. Otherwise, it returns a Nothing
+-- Function that returns the sum of all individual distances in a path between two cities in a Just value, if all the consecutive pairs of cities are directly connected by roads. Otherwise, it returns Nothing
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance _ [] = Just 0
 pathDistance _ [_] = Just 0
@@ -72,7 +71,7 @@ groupCities ((city, _):xs) =
         remaining = filter (\(c, _) -> c /= city) xs
     in (city, count) : groupCities remaining
 
--- May also need redoing in the future
+-- May also need redoing in the future, complexity O(n^2)
 -- Function that returns the names of the cities with the highest number of roads connecting to them
 rome :: RoadMap -> [City]
 rome roadmap =
@@ -80,6 +79,17 @@ rome roadmap =
         groupedConnections = groupCities connections
         maxDegree = maximum (map snd groupedConnections)
     in [city | (city, degree) <- groupedConnections, degree == maxDegree]
+
+-- OU (versão mais eficiente, complexity O(m log m) ou O(n log n))
+{-
+rome :: RoadMap -> [City]
+rome roadmap =
+    let allCities = [city | (c1, c2, _) <- roadmap, city <- [c1, c2]]
+        groupedCities = List.group $ List.sort allCities
+        cityCounts = [(head group, length group) | group <- groupedCities]
+        maxDegree = maximum (map snd cityCounts)
+    in [city | (city, degree) <- cityCounts, degree == maxDegree]
+-}
 
 isStronglyConnected :: RoadMap -> Bool
 isStronglyConnected = undefined

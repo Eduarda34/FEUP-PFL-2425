@@ -53,3 +53,43 @@
 ![](images/7.png)
 
 - **Data.List.find matches roadmap** --> Procura no roadmap um tuplo (x, y, d) onde *x* e *y* são as cidades e *d* é a distância entre elas. A função **find** retorna o *primeiro elemento* que faz o *match* ou *Nothing* se nenhuma tupla satisfizer a condição
+
+&nbsp;
+
+![](images/8.png)
+
+- **RoadMap** = Lista de tuplos --> Cada tuplo indica que duas cidades estão conectadas uma com a outra e invlui a distância entre elas
+- **City** = String --> Cidade
+
+- A função retorna uma lista de pares *[(City, Distance)]*. Cada par representa uma cidade conectada diretamente à cidade fornecida e a distância entre elas.
+
+&nbsp;
+
+![](images/9.png)
+
+- Percorre o **roadmap** à procura do tuplos onde *x* é a cidade **city** fornecida
+- Para cada tuplo onde *x == city*, retorna o par *(y, d)* qe contém a cidade *y* diretamente conectada a **city** e a distância *d* entre elas
+
+&nbsp;
+
+![](images/10.png)
+
+- **RoadMap** = Lista de tuplos --> indica as cidades conectadas e as distâncias entre elas
+- **Path** = Caminho (lista de cidades) --> Representa a sequência de cidades pelas quais desejamos calcular a distância
+- A função retorna um valor do tipo *Maybe Distance*. Se todas as cidades no caminho estão conectadas, retorna *Just Distance* que contém a distância total. Caso contrário, retorna *Nothing*
+
+&nbsp;
+
+![](images/11.png)
+![](images/12.png)
+
+- Se o *path* estiver vazio ([]) ou se tiver apenas uma cidade (por exemplo, ["A"]), a função retorna *Just 0*
+- Um caminho vazio não tem uma distância associada, então o resultado é zero
+
+&nbsp;
+
+![](images/13.png)
+
+- **distance roadmap city1 city2** --> verificar se as duas primeiras cidades estão diretamente conectadas e, se sim, qual a distância entre elas
+- **Just d** --> Significa que as cidades estão conectadas e que *d* é a distância entre elas
+- **Nothing** --> Significa que não há conexão

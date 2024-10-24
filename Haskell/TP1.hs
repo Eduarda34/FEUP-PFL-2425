@@ -81,7 +81,16 @@ shortestPath :: RoadMap -> City -> City -> [Path]
 shortestPath roadmap city1 city2 
     | city1 == city2 = [[city1]]
     | not (areAdjacent roadmap city1 city2) = []
-    | otherwise = undefined
+{-    | otherwise = [path1] ++ shortestPaths
+    where
+        paths = allPaths roadmap city1 city2 []
+        shortestPaths = [path | path <- paths, length path == length (shortestPath roadmap (head path) city2) + 1]
+        path1 = shortestPath roadmap city1 city2
+        shortestPath roadmap city1 city2
+            | city1 == city2 = [city1]
+            | not (areAdjacent roadmap city1 city2) = []
+            | otherwise = [city1:shortestPath roadmap city2 city2]
+-}
 
 travelSales :: RoadMap -> Path
 travelSales = undefined

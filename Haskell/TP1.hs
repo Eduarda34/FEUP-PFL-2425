@@ -48,7 +48,7 @@ pathDistance _ [] = Just 0
 pathDistance _ [_] = Just 0
 pathDistance roadmap (city1:city2:xs) = 
         case distance roadmap city1 city2 of
-                Just d -> (+ d) <$> pathDistance roadmap (city2:xs)
+                Just d -> fmap (d +) (pathDistance roadmap (city2:xs))
                 Nothing -> Nothing
 
 -- Function that returns the names of the cities with the highest number of roads connecting to them, complexity O(n log n)
@@ -66,8 +66,22 @@ isStronglyConnected roadmap =
     let allCities = Data.List.nub [c | (c1, c2, _) <- roadmap, c <- [c1, c2]]
     in all (\city -> length (adjacent roadmap city) == length allCities - 1) allCities
 
+-- Helper function to find all paths between two cities
+--allPaths :: RoadMap -> City -> City -> [City] -> [Path]
+--allPaths roadmap city1 city2 cityList = [city1:path | (nextCity, _) <- adjacent roadmap city1, nextCity `notElem` cityList, path <- allPaths roadmap nextCity city2 (nextCity:cityList)]
+
+-- OU
+
+allPaths :: RoadMap -> City -> City -> [City] -> [Path]
+allPaths roadmap city1 city2 cityList =
+    let nextCities = [c | (c1, c2, _) <- roadmap, c <- [c1, c2], c /= city1, c /= city2, c `notElem` cityList]
+    in [city1:path | c <- nextCities, path <- allPaths roadmap c city2 (c:cityList)]
+
 shortestPath :: RoadMap -> City -> City -> [Path]
-shortestPath = undefined
+shortestPath roadmap city1 city2 
+    | city1 == city2 = [[city1]]
+    | not (areAdjacent roadmap city1 city2) = []
+    | otherwise = undefined
 
 travelSales :: RoadMap -> Path
 travelSales = undefined

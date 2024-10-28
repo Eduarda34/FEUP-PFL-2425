@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Replace case with fromMaybe" #-}
 import qualified Data.List
 --import qualified Data.Array
 --import qualified Data.Bits
@@ -23,7 +25,7 @@ areAdjacent roadmap city1 city2 = any matches roadmap
 
 -- Function that returns a Just value with the distance between two cities connected directly, or Nothing otherwise
 distance :: RoadMap -> City -> City -> Maybe Distance
-distance roadmap city1 city2 = 
+distance roadmap city1 city2 =
     case Data.List.find matches roadmap of
         Just (_, _, d) -> Just d
         Nothing -> Nothing
@@ -46,7 +48,7 @@ adjacent roadmap city =
 pathDistance :: RoadMap -> Path -> Maybe Distance
 pathDistance _ [] = Just 0
 pathDistance _ [_] = Just 0
-pathDistance roadmap (city1:city2:xs) = 
+pathDistance roadmap (city1:city2:xs) =
         case distance roadmap city1 city2 of
                 Just d -> fmap (d +) (pathDistance roadmap (city2:xs))
                 Nothing -> Nothing
@@ -66,22 +68,62 @@ isStronglyConnected roadmap =
     let allCities = Data.List.nub [c | (c1, c2, _) <- roadmap, c <- [c1, c2]]
     in all (\city -> length (adjacent roadmap city) == length allCities - 1) allCities
 
+{-
 -- Helper function to find all paths between two cities
---allPaths :: RoadMap -> City -> City -> [City] -> [Path]
---allPaths roadmap city1 city2 cityList = [city1:path | (nextCity, _) <- adjacent roadmap city1, nextCity `notElem` cityList, path <- allPaths roadmap nextCity city2 (nextCity:cityList)]
+allPaths :: RoadMap -> City -> City -> [City] -> [Path]
+allPaths roadmap city1 city2 cityList = [city1:path | (nextCity, _) <- adjacent roadmap city1, nextCity `notElem` cityList, path <- allPaths roadmap nextCity city2 (nextCity:cityList)]
 
--- OU
+OU
 
 allPaths :: RoadMap -> City -> City -> [City] -> [Path]
 allPaths roadmap city1 city2 cityList =
     let nextCities = [c | (c1, c2, _) <- roadmap, c <- [c1, c2], c /= city1, c /= city2, c `notElem` cityList]
     in [city1:path | c <- nextCities, path <- allPaths roadmap c city2 (c:cityList)]
+-}
 
+-- Helper function to convert the RoadMap to an adjacency list representation locally.
+toAdjList :: RoadMap -> [(City, [(City, Distance)])]
+toAdjList roadmap =
+    let citiesList = cities roadmap
+    in [(city, adjacent roadmap city) | city <- citiesList]
+
+-- Dijkstra's algorithm adaptation for finding the shortest paths between two cities.
 shortestPath :: RoadMap -> City -> City -> [Path]
-shortestPath roadmap city1 city2 
+shortestPath roadmap start end
+    | start == end = [[start]]
+    | otherwise = dijkstra (toAdjList roadmap) [(start, [start], 0)] [] []
+  where
+    -- Dijkstra's function
+    dijkstra adjList [] _ paths = paths
+    dijkstra adjList ((currentCity, currentPath, currentDist):queue) visited paths
+        | currentCity == end =
+            let shortestDist = case paths of
+                                    [] -> currentDist
+                                    _  -> minimum (map (pathDistanceFrom adjList) paths)
+                newPaths = if currentDist == shortestDist then currentPath : paths else paths
+            in dijkstra adjList queue (currentCity : visited) newPaths
+        | otherwise =
+            let neighbors = case lookup currentCity adjList of
+                                Just n -> n
+                                Nothing -> []
+                newEntries = [(n, currentPath ++ [n], currentDist + d) |
+                                (n, d) <- neighbors, n `notElem` visited]
+                newQueue = Data.List.sortOn (\(_, _, d) -> d) (queue ++ newEntries)
+            in dijkstra adjList newQueue (currentCity : visited) paths
+
+    -- Use `pathDistance` to calculate the distance of a path from the adjacency list.
+    pathDistanceFrom :: [(City, [(City, Distance)])] -> Path -> Distance
+    pathDistanceFrom adjList path =
+        case pathDistance roadmap path of
+            Just d -> d
+            Nothing -> 0
+
+{- OU (usando as funções ja feitas)
+shortestPath :: RoadMap -> City -> City -> [Path]
+shortestPath roadmap city1 city2
     | city1 == city2 = [[city1]]
     | not (areAdjacent roadmap city1 city2) = []
-{-    | otherwise = [path1] ++ shortestPaths
+    | otherwise = [path1] ++ shortestPaths
     where
         paths = allPaths roadmap city1 city2 []
         shortestPaths = [path | path <- paths, length path == length (shortestPath roadmap (head path) city2) + 1]

@@ -87,6 +87,18 @@ toAdjList roadmap =
     let citiesList = cities roadmap
     in [(city, adjacent roadmap city) | city <- citiesList]
 
+--- Helper to get neighbors from adjacency list
+lookupAdjacent :: [(City, [(City, Distance)])] -> City -> [(City, Distance)]
+lookupAdjacent adj city = maybe [] id (lookup city adj)
+
+-- Helper to get direct distance from adjacency list
+lookupDistance :: [(City, [(City, Distance)])] -> City -> City -> Maybe Distance
+lookupDistance adj city1 city2 = lookup city2 =<< lookup city1 adj
+
+-- Use `pathDistance` to calculate the distance of a path from the adjacency list.
+pathDistanceFrom :: [(City, [(City, Distance)])] -> Path -> Distance
+pathDistanceFrom adjList path = sum [d | (c1, c2) <- zip path (tail path), Just d <- [lookupDistance adjList c1 c2]]
+
 -- Dijkstra's algorithm adaptation for finding the shortest paths between two cities.
 shortestPath :: RoadMap -> City -> City -> [Path]
 shortestPath roadmap start end
@@ -111,14 +123,9 @@ shortestPath roadmap start end
                 newQueue = Data.List.sortOn (\(_, _, d) -> d) (queue ++ newEntries)
             in dijkstra adjList newQueue (currentCity : visited) paths
 
-    -- Use `pathDistance` to calculate the distance of a path from the adjacency list.
-    pathDistanceFrom :: [(City, [(City, Distance)])] -> Path -> Distance
-    pathDistanceFrom adjList path =
-        case pathDistance roadmap path of
-            Just d -> d
-            Nothing -> 0
+{- 
+-- OU (usando as funções ja feitas)
 
-{- OU (usando as funções ja feitas)
 shortestPath :: RoadMap -> City -> City -> [Path]
 shortestPath roadmap city1 city2
     | city1 == city2 = [[city1]]
@@ -134,8 +141,31 @@ shortestPath roadmap city1 city2
             | otherwise = [city1:shortestPath roadmap city2 city2]
 -}
 
+-- Solves the TSP using a brute-force approach and adjacency list for efficiency
 travelSales :: RoadMap -> Path
-travelSales = undefined
+travelSales roadmap =
+    let adjList = toAdjList roadmap
+        allCities = map fst adjList
+
+        -- Recursive helper to find shortest TSP path from a specific city
+        findShortestPath :: City -> [City] -> Distance -> Path
+        findShortestPath start visitedPath totalDistance
+            | length visitedPath == length allCities =
+                case lookupDistance adjList (last visitedPath) start of
+                    Just returnDist -> visitedPath ++ [start]
+                    Nothing -> []
+            | otherwise =
+                let neighbors = lookupAdjacent adjList (last visitedPath)
+                    validPaths = [(nextCity, dist) | (nextCity, dist) <- neighbors, nextCity `notElem` visitedPath]
+                    paths = [findShortestPath start (visitedPath ++ [nextCity]) (totalDistance + dist) | (nextCity, dist) <- validPaths]
+                    -- Filter out any invalid paths and sort by total path distance
+                    validSortedPaths = Data.List.sortOn (pathDistanceFrom adjList) (filter (not . null) paths)
+                in if null validSortedPaths then [] else head validSortedPaths
+
+    in if not (isStronglyConnected roadmap) then []
+       else case allCities of
+           [] -> []
+           (start:_) -> findShortestPath start [start] 0
 
 tspBruteForce :: RoadMap -> Path
 tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function

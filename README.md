@@ -1,13 +1,12 @@
 # PFL - Project 1
 
-![](images/feup.webp)
-
----
 T16_G07
-
+---
 Maria Eduarda Pacheco Mendes Araújo - up202004473 --> percentagem
+
 Miguel Ângelo Pacheco Valente - up201704608 --> percentagem
 
+---
 ## General Description
 In this project we're asked to implemente the functions requested, testing the quality and efficiency of the code.
 

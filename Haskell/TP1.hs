@@ -9,6 +9,8 @@ import Data.Time.Clock (getCurrentTime, diffUTCTime)
 import qualified Data.Time.Clock as Clock
 import qualified Data.Time.Clock.POSIX as POSIX
 import Control.Monad (replicateM)
+import Control.Monad
+import Test.QuickCheck (Small(getSmall))
 
 -- PFL 2024/2025 Practical assignment 1
 
@@ -102,8 +104,7 @@ shortestPath roadmap start end
             let neighbors = case lookup currentCity adjList of
                                 Just n -> n
                                 Nothing -> []
-                newEntries = [(n, currentPath ++ [n], currentDist + d) |
-                                (n, d) <- neighbors, n `notElem` visited]
+                newEntries = [(n, currentPath ++ [n], currentDist + d) | (n, d) <- neighbors, n `notElem` visited]
                 newQueue = Data.List.sortOn (\(_, _, d) -> d) (queue ++ newEntries)
             in dijkstra adjList newQueue (currentCity : visited) paths
 
@@ -145,41 +146,25 @@ gTest2 = [("0","1",10),("0","2",15),("0","3",20),("1","2",35),("1","3",25),("2",
 gTest3 :: RoadMap -- unconnected graph
 gTest3 = [("0","1",4),("2","3",2)]
 
--- Testing stuff
-
-gSmall :: RoadMap
-gSmall = [("A", "B", 1), ("A", "C", 2), ("B", "C", 1)]
-
-gMedium :: RoadMap
-gMedium = [("0", "1", 10), ("0", "2", 15), ("0", "3", 20), ("1", "2", 35), ("1", "3", 25), ("2", "3", 30)]
-
-gLarge :: RoadMap
-gLarge = [("0", "1", 1), ("0", "2", 2), ("0", "3", 3), ("1", "4", 4), ("2", "4", 5), ("3", "4", 6), ("1", "2", 7), ("1", "3", 8), ("2", "3", 9)] ++ 
-          [("A" ++ show i, "A" ++ show (i + 1), i) | i <- [1..99]]
-
-gVeryLarge :: RoadMap
-gVeryLarge = [("0", "1", 1), ("0", "2", 2), ("0", "3", 3), ("1", "4", 4), ("2", "4", 5), ("3", "4", 6), ("1", "2", 7), ("1", "3", 8), ("2", "3", 9)] ++ 
-              [("A" ++ show i, "A" ++ show (i + 1), i) | i <- [1..999]]
-
--- Timing functions
-measureCPUTime :: String -> (RoadMap -> Path) -> RoadMap -> IO ()
-measureCPUTime name func roadmap = do
+-- Timing functions for travelSales
+measureCPUTimeTravel :: String -> (RoadMap -> Path) -> RoadMap -> IO ()
+measureCPUTimeTravel name func roadmap = do
     start <- getCPUTime
     let _ = func roadmap  -- Call the function
     end <- getCPUTime
     let diff = fromIntegral (end - start) / (10^12)  -- Convert picoseconds to seconds
     putStrLn $ name ++ ": " ++ show diff ++ " seconds"
 
-measureWallClockTime :: String -> (RoadMap -> Path) -> RoadMap -> IO ()
-measureWallClockTime name func roadmap = do
+measureWallClockTimeTravel :: String -> (RoadMap -> Path) -> RoadMap -> IO ()
+measureWallClockTimeTravel name func roadmap = do
     start <- getCurrentTime
     let _ = func roadmap  -- Call the function
     end <- getCurrentTime
     let diff = diffUTCTime end start
     putStrLn $ name ++ ": " ++ show diff ++ " seconds"
 
-measureTimeMultipleRuns :: String -> (RoadMap -> Path) -> RoadMap -> Int -> IO ()
-measureTimeMultipleRuns name func roadmap n = do
+measureTimeMultipleRunsTravel :: String -> (RoadMap -> Path) -> RoadMap -> Int -> IO ()
+measureTimeMultipleRunsTravel name func roadmap n = do
     times <- replicateM n $ do
         start <- getCurrentTime
         let _ = func roadmap  -- Call the function
@@ -188,13 +173,47 @@ measureTimeMultipleRuns name func roadmap n = do
     let avgTime = sum times / fromIntegral n
     putStrLn $ name ++ ": average time over " ++ show n ++ " runs is " ++ show avgTime ++ " seconds"
 
--- Test function to measure execution times
-testTiming :: RoadMap -> IO ()
-testTiming roadmap = do
-    putStrLn "Testing travelSales function:"
-    measureCPUTime "CPU Time" travelSales roadmap
-    measureWallClockTime "Wall Clock Time" travelSales roadmap
-    measureTimeMultipleRuns "Multiple Runs" travelSales roadmap 10
+-- Timing functions for shortestPath
+measureCPUTimeShortest :: String -> (RoadMap -> City -> City -> [Path]) -> RoadMap -> City -> City -> IO ()
+measureCPUTimeShortest label f roadmap startCity endCity = do
+    start <- getCPUTime
+    let result = f roadmap startCity endCity
+    end <- getCPUTime
+    let diff = fromIntegral (end - start) * 1e-12  -- Convert to seconds
+    putStrLn $ label ++ ": " ++ show diff ++ " seconds"
+
+measureWallClockTimeShortest :: String -> (RoadMap -> City -> City -> [Path]) -> RoadMap -> City -> City -> IO ()
+measureWallClockTimeShortest label f roadmap startCity endCity = do
+    start <- getCurrentTime
+    let result = f roadmap startCity endCity
+    end <- getCurrentTime
+    let diff = diffUTCTime end start
+    putStrLn $ label ++ ": " ++ show diff ++ " seconds"
+
+measureTimeMultipleRunsShortest :: String -> (RoadMap -> City -> City -> [Path]) -> RoadMap -> City -> City -> Int -> IO ()
+measureTimeMultipleRunsShortest label f roadmap startCity endCity n = do
+    times <- forM [1..n] $ \_ -> do
+        start <- getCPUTime
+        let result = f roadmap startCity endCity
+        end <- getCPUTime
+        let diff = fromIntegral (end - start) * 1e-12
+        return diff
+    let total = sum times
+    let average = total / fromIntegral n
+    putStrLn $ label ++ ": Average Time: " ++ show average ++ " seconds"
+
+-- Test function to measure execution times for both travelSales and shortestPath
+testTiming :: RoadMap -> (City, City) -> IO ()
+testTiming roadmap (startCity, endCity) = do
+    putStrLn "\nTesting shortestPath function:"
+    measureCPUTimeShortest "CPU Time (shortestPath)" shortestPath roadmap startCity endCity
+    measureWallClockTimeShortest "Wall Clock Time (shortestPath)" shortestPath roadmap startCity endCity
+    measureTimeMultipleRunsShortest "Multiple Runs (shortestPath)" shortestPath roadmap startCity endCity 10
+
+    putStrLn "\nTesting travelSales function:"
+    measureCPUTimeTravel "CPU Time (travelSales)" travelSales roadmap
+    measureWallClockTimeTravel "Wall Clock Time (travelSales)" travelSales roadmap
+    measureTimeMultipleRunsTravel "Multiple Runs (travelSales)" travelSales roadmap 10
 
 measureTime :: (String, RoadMap) -> IO ()
 measureTime (label, roadmap) = do
@@ -213,13 +232,16 @@ measureTime (label, roadmap) = do
 main :: IO ()
 main = do
     -- Define small, medium, large, and very large graphs
-    let smallGraph = [("A", "B", 1), ("B", "C", 2), ("C", "A", 3)]
-    let mediumGraph = [("A", "B", 1), ("A", "C", 2), ("B", "C", 1), ("C", "D", 4), ("D", "E", 2), ("E", "F", 1), ("F", "A", 5)]
+    let smallGraph = [("CityA", "CityB", 1), ("CityB", "CityC", 2), ("CityC", "CityA", 3)]
+    let mediumGraph = [("CityA", "CityB", 1), ("CityA", "CityC", 2), ("CityB", "CityC", 1), ("CityC", "CityD", 4), ("CityD", "CityE", 2), ("CityE", "CityF", 1), ("CityF", "CityA", 5)]
     let largeGraph = [("City" ++ show i, "City" ++ show j, (i + j)) | i <- [1..100], j <- [1..100], i /= j]
     let largerGraph1 = [("City" ++ show i, "City" ++ show j, (i + j)) | i <- [1..150], j <- [1..150], i /= j]
     let largerGraph2 = [("City" ++ show i, "City" ++ show j, (i + j)) | i <- [1..200], j <- [1..200], i /= j]
     let largerGraph3 = [("City" ++ show i, "City" ++ show j, (i + j)) | i <- [1..250], j <- [1..250], i /= j]
-    
+    let denseGraph1 = [("City" ++ show i, "City" ++ show j, abs (i - j) + 1) | i <- [1..10], j <- [1..10], i /= j]
+    let denseLargeGraph = largeGraph ++ [("City" ++ show i, "City" ++ show j, abs (i - j) `mod` 5 + 1) | i <- [1..50], j <- [i+1..50], abs (i - j) <= 3]
+    let denseVeryLargeGraph = largerGraph1 ++ [("CityA" ++ show i, "CityA" ++ show j, abs (i - j) `mod` 10 + 1) | i <- [1..500], j <- [i+1..500], abs (i - j) <= 5]
+{-
     -- Measure and print the time taken for each graph
     mapM_ measureTime
         [ ("Small Graph", smallGraph)
@@ -228,20 +250,45 @@ main = do
         , ("Larger Graph 1 (100 Cities)", largerGraph1)
         , ("Larger Graph 2 (150 Cities)", largerGraph2)
         , ("Larger Graph 3 (200 Cities)", largerGraph3)
+        , ("Dense Graph 1", denseGraph1)
+        , ("Large Dense Graph", denseLargeGraph)
+        , ("Very Large Dense Graph", denseVeryLargeGraph)
         ]
-
-{-
-    testTiming gTest1
-    testTiming gTest2
-    testTiming gTest3
-    testTiming gSmall
-    testTiming gMedium
-    testTiming gLarge
-    testTiming gVeryLarge
-    testTiming smallGraph
-    testTiming mediumGraph
-    testTiming largeGraph
-    testTiming largerGraph1
-    testTiming largerGraph2
-    testTiming largerGraph3
 -}
+    -- Run testTiming for each graph with descriptive labels
+     -- Run testTiming for each graph with descriptive labels
+    putStrLn "Testing timing for smallGraph"
+    testTiming smallGraph ("CityA", "CityB")
+    putStrLn ""
+
+    putStrLn "Testing timing for mediumGraph"
+    testTiming mediumGraph ("CityA", "CityD")
+    putStrLn ""
+
+    putStrLn "Testing timing for largeGraph"
+    testTiming largeGraph ("City1", "City2")  -- Ensure these cities exist
+    putStrLn ""
+
+    putStrLn "Testing timing for largerGraph1"
+    testTiming largerGraph1 ("City1", "City2")
+    putStrLn ""
+
+    putStrLn "Testing timing for largerGraph2"
+    testTiming largerGraph2 ("City1", "City2")
+    putStrLn ""
+
+    putStrLn "Testing timing for largerGraph3"
+    testTiming largerGraph3 ("City1", "City2")
+    putStrLn ""
+
+    putStrLn "Testing timing for denseGraph1"
+    testTiming denseGraph1 ("City1", "City2")
+    putStrLn ""
+
+    putStrLn "Testing timing for denseLargeGraph"
+    testTiming denseLargeGraph ("City1", "City2")
+    putStrLn ""
+
+    putStrLn "Testing timing for denseVeryLargeGraph"
+    testTiming denseVeryLargeGraph ("City1", "City2")
+    putStrLn ""

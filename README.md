@@ -34,7 +34,7 @@ The **shortestPath** funciton is an adaptation of **Dijkstra's algorithm** to fi
 
 ## travelSales function
 
-The **travelSales** function is an implementation of a *brute force* approach to solve the **Traveling Salesman Problem** (*TSP*) on a *RoadMap* graph.
+The **travelSales** function provides a solution to the  **Traveling Salesman Problem** (*TSP*) by using *greedy algorithm*.
 
 **TSP** aims to find the shortest possible route that visits every city exactly once and returns to the starting city.
 
@@ -46,6 +46,5 @@ The **travelSales** function is an implementation of a *brute force* approach to
 
 ### Helper Functions:
 - **toAdjList** --> Converts the *RoadMap* into an adjacency list format making it easier to access neighboring cities and their distances
-- **lookupAdjacent** --> Fetches all directly connected cities and their distances from the adjacency list
+- **lookupAdjacent** --> Finds all cities directly connected to a given city in the adjacency list.
 - **lookupDistance** --> Retrieves the distance between two cities from the adjacency list
-- **pathDistanceFrom** --> Calculates the total distance of a given path using the adjacency list

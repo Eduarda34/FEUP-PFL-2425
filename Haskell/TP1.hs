@@ -1,8 +1,8 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Replace case with fromMaybe" #-}
 import qualified Data.List
---import qualified Data.Array
---import qualified Data.Bits
+-- import qualified Data.Array
+-- import qualified Data.Bits
 import Data.Time
 import System.CPUTime
 import Data.Time.Clock (getCurrentTime, diffUTCTime)
@@ -41,7 +41,7 @@ distance roadmap city1 city2 =
 
 -- Function that returns the cities adjacent to a particular city and the distance to them 
 adjacent :: RoadMap -> City -> [(City, Distance)]
-adjacent roadmap city = [(y, d) | (x, y, d) <- roadmap, x == city] ++ [(x, d) | (y, x, d) <- roadmap, y == city]
+adjacent roadmap city = Data.List.nub [(c2, d) | (c1, c2, d) <- roadmap, c1 == city] ++ Data.List.nub [(c1, d) | (c1, c2, d) <- roadmap, c2 == city]
 
 -- Function that returns the sum of all individual distances in a path between two cities in a Just value, if all the consecutive pairs of cities are directly connected by roads. Otherwise, it returns Nothing
 pathDistance :: RoadMap -> Path -> Maybe Distance
@@ -61,7 +61,7 @@ rome roadmap =
         maxDegree = maximum (map snd cityCounts)
     in [city | (city, degree) <- cityCounts, degree == maxDegree]
 
--- Function that returns a boolean indicating whether all the cities in the graph are connected in the roadmap 
+-- Function that returns a boolean indicating whether all the cities in the graph are connected in the roadmap
 isStronglyConnected :: RoadMap -> Bool
 isStronglyConnected roadmap =
     let allCities = Data.List.nub [c | (c1, c2, _) <- roadmap, c <- [c1, c2]]
@@ -75,11 +75,17 @@ toAdjList roadmap =
 
 --- Helper function to get neighbors from adjacency list
 lookupAdjacent :: [(City, [(City, Distance)])] -> City -> [(City, Distance)]
-lookupAdjacent adj city = maybe [] id (lookup city adj)
+lookupAdjacent adjList city = 
+    case lookup city adjList of
+        Just neighbors -> neighbors
+        Nothing -> []
 
--- Helper function to get direct distance from adjacency list
+-- Helper function to get distance from adjacency list
 lookupDistance :: [(City, [(City, Distance)])] -> City -> City -> Maybe Distance
-lookupDistance adj city1 city2 = lookup city2 =<< lookup city1 adj
+lookupDistance adjList from to = 
+    case lookup from adjList of
+        Just neighbors -> lookup to neighbors
+        Nothing -> Nothing
 
 -- Helper function to calculate the distance of a path from the adjacency list.
 pathDistanceFrom :: [(City, [(City, Distance)])] -> Path -> Distance
@@ -111,7 +117,7 @@ shortestPath roadmap start end
 -- Helper function to find a greedy path for the TSP recursively
 findGreedyPath :: [(City, [(City, Distance)])] -> City -> [City] -> Distance -> Path
 findGreedyPath adjList start visited totalDistance
-    | length visited == length adjList =
+    | length visited == length (map fst adjList) =
         case lookupDistance adjList (last visited) start of
             Just returnDist -> visited ++ [start]
             Nothing -> []
@@ -126,12 +132,13 @@ findGreedyPath adjList start visited totalDistance
 
 -- Function that returns a possible solution for the TSP. It uses a greedy approach and an adjacency list for better efficiency
 travelSales :: RoadMap -> Path
-travelSales roadmap = 
-    let adjList = toAdjList roadmap
-        citiesList = map fst adjList
-    in case citiesList of
-        [] -> []
-        (start:_) -> findGreedyPath adjList start [start] 0
+travelSales roadMap = Data.List.minimumBy distanceCompare possiblePaths
+  where
+    cities = Data.List.nub $ concat [[a, b] | (a, b, _) <- roadMap] -- nub to get all unique cities
+    possiblePaths = [path ++ [head path] | path <- Data.List.permutations cities] -- permutations to ensure the path returns to the start
+    distanceCompare path1 path2 = case (pathDistance roadMap path1, pathDistance roadMap path2) of
+        (Just d1, Just d2) -> compare d1 d2
+        _ -> EQ
 
 tspBruteForce :: RoadMap -> Path
 tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function
@@ -241,7 +248,7 @@ main = do
     let denseGraph1 = [("City" ++ show i, "City" ++ show j, abs (i - j) + 1) | i <- [1..10], j <- [1..10], i /= j]
     let denseLargeGraph = largeGraph ++ [("City" ++ show i, "City" ++ show j, abs (i - j) `mod` 5 + 1) | i <- [1..50], j <- [i+1..50], abs (i - j) <= 3]
     let denseVeryLargeGraph = largerGraph1 ++ [("CityA" ++ show i, "CityA" ++ show j, abs (i - j) `mod` 10 + 1) | i <- [1..500], j <- [i+1..500], abs (i - j) <= 5]
-{-
+
     -- Measure and print the time taken for each graph
     mapM_ measureTime
         [ ("Small Graph", smallGraph)
@@ -254,9 +261,9 @@ main = do
         , ("Large Dense Graph", denseLargeGraph)
         , ("Very Large Dense Graph", denseVeryLargeGraph)
         ]
--}
+
+{-
     -- Run testTiming for each graph with descriptive labels
-     -- Run testTiming for each graph with descriptive labels
     putStrLn "Testing timing for smallGraph"
     testTiming smallGraph ("CityA", "CityB")
     putStrLn ""
@@ -292,3 +299,4 @@ main = do
     putStrLn "Testing timing for denseVeryLargeGraph"
     testTiming denseVeryLargeGraph ("City1", "City2")
     putStrLn ""
+-}

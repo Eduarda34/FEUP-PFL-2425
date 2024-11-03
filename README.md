@@ -3,12 +3,16 @@
 T16_G07
 ---
 Maria Eduarda Pacheco Mendes Araújo - up202004473 --> 50%
+- Helped more with the last 2 functions as they were the hardest ones.
 
 Miguel Ângelo Pacheco Valente - up201704608 --> 50%
+- Coded the first few functions as they were small and easy and worked together for the last 2 functions.
+
+We worked together throughout the project but more intensely in the last 2 functions.
 
 ---
 ## General Description
-In this project we're asked to implement the functions requested, testing the quality and efficiency of the code.
+In this project we're asked to implement  to define and use appropriate data types for a graph representing a country, composed of a set of  interconnected cities, also testing the quality and efficiency of the code.
 
 ---
 

@@ -1,0 +1,60 @@
+CPU Time (shortestPath): 3.429e-6 seconds
+Wall Clock Time (shortestPath): 0.000001344s seconds
+Multiple Runs (shortestPath): Average Time: 7.726999999999999e-7 seconds
+CPU Time (travelSales): 2.157e-6 seconds
+Wall Clock Time (travelSales): 0.00000121s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000008469s seconds
+CPU Time (shortestPath): 1.917e-6 seconds
+Wall Clock Time (shortestPath): 0.000000948s seconds
+Multiple Runs (shortestPath): Average Time: 2.4533e-6 seconds
+CPU Time (travelSales): 2.138e-6 seconds
+Wall Clock Time (travelSales): 0.000000874s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000003163s seconds
+CPU Time (shortestPath): 1.778e-6 seconds
+Wall Clock Time (shortestPath): 0.000000783s seconds
+Multiple Runs (shortestPath): Average Time: 5.913e-7 seconds
+CPU Time (travelSales): 1.782e-6 seconds
+Wall Clock Time (travelSales): 0.000000879s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000003043s seconds
+CPU Time (shortestPath): 1.612e-6 seconds
+Wall Clock Time (shortestPath): 0.000000699s seconds
+Multiple Runs (shortestPath): Average Time: 6.571e-7 seconds
+CPU Time (travelSales): 1.96e-6 seconds
+Wall Clock Time (travelSales): 0.000000808s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000003599s seconds
+CPU Time (shortestPath): 2.2519999999999998e-6 seconds
+Wall Clock Time (shortestPath): 0.000000899s seconds
+Multiple Runs (shortestPath): Average Time: 5.991999999999999e-7 seconds
+CPU Time (travelSales): 2.359e-6 seconds
+Wall Clock Time (travelSales): 0.00000084s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000003177s seconds
+CPU Time (shortestPath): 2.051e-6 seconds
+Wall Clock Time (shortestPath): 0.000000906s seconds
+Multiple Runs (shortestPath): Average Time: 6.516e-7 seconds
+CPU Time (travelSales): 2.036e-6 seconds
+Wall Clock Time (travelSales): 0.000001244s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000003929s seconds
+CPU Time (shortestPath): 1.959e-6 seconds
+Wall Clock Time (shortestPath): 0.000000703s seconds
+Multiple Runs (shortestPath): Average Time: 5.976e-7 seconds
+CPU Time (travelSales): 1.65e-6 seconds
+Wall Clock Time (travelSales): 0.000001297s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000006519s seconds
+CPU Time (shortestPath): 1.952e-6 seconds
+Wall Clock Time (shortestPath): 0.000000753s seconds
+Multiple Runs (shortestPath): Average Time: 5.74e-7 seconds
+CPU Time (travelSales): 1.908e-6 seconds
+Wall Clock Time (travelSales): 0.000000795s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000004522s seconds
+CPU Time (shortestPath): 3.105e-6 seconds
+Wall Clock Time (shortestPath): 0.000001606s seconds
+Multiple Runs (shortestPath): Average Time: 9.927999999999998e-7 seconds
+CPU Time (travelSales): 2.572e-6 seconds
+Wall Clock Time (travelSales): 0.000001221s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.000000323s seconds
+CPU Time (shortestPath): 1.62e-6 seconds
+Wall Clock Time (shortestPath): 0.000001195s seconds
+Multiple Runs (shortestPath): Average Time: 6.326999999999999e-7 seconds
+CPU Time (travelSales): 1.554e-6 seconds
+Wall Clock Time (travelSales): 0.000000843s seconds
+Multiple Runs (travelSales): average time over 10 runs is 0.0000002876s seconds

@@ -1,3 +1,7 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Replace case with fromMaybe" #-}
+{-# HLINT ignore "Use replicateM" #-}
+{-# HLINT ignore "Use fewer imports" #-}
 import qualified Data.List
 -- import qualified Data.Array
 -- import qualified Data.Bits
@@ -8,6 +12,8 @@ import Control.Monad
 import Test.QuickCheck (Small(getSmall))
 import System.IO (withFile, IOMode(..), hPutStrLn, hFlush)
 import Data.Time.Clock.POSIX (getPOSIXTime)
+import qualified Data.Time.Clock as Clock
+import qualified Data.Time.Clock.POSIX as POSIX
 import System.CPUTime (getCPUTime)
 import Data.Time.Clock (getCurrentTime, diffUTCTime)
 
@@ -139,6 +145,14 @@ travelSales roadMap = Data.List.minimumBy distanceCompare possiblePaths
         (Just d1, Just d2) -> compare d1 d2
         _ -> EQ
 
+{-
+-- Function that returns a possible solution for the TSP. It uses a greedy approach and an adjacency list for better efficiency
+travelSales :: RoadMap -> Path
+travelSales roadMap = findGreedyPath adjList start [start] 0
+  where
+    adjList = toAdjList roadMap
+    start = head (Data.List.nub $ concat [[a, b] | (a, b, _) <- roadMap])
+-}
 tspBruteForce :: RoadMap -> Path
 tspBruteForce = undefined -- only for groups of 3 people; groups of 2 people: do not edit this function
 
@@ -232,6 +246,20 @@ testTiming roadmap (startCity, endCity) = do
     measureWallClockTimeTravel "Wall Clock Time (travelSales)" travelSales roadmap
     measureTimeMultipleRunsTravel "Multiple Runs (travelSales)" travelSales roadmap 10
 
+measureTime :: (String, RoadMap) -> IO ()
+measureTime (label, roadmap) = do
+    start <- POSIX.getPOSIXTime
+    let result = travelSales roadmap
+    end <- POSIX.getPOSIXTime
+    let diff = end - start
+
+    -- Measure printing time
+    printStart <- POSIX.getPOSIXTime
+    putStrLn $ label ++ ": " ++ show result ++ " (Time: " ++ show diff ++ " seconds)"
+    printEnd <- POSIX.getPOSIXTime
+    let printDiff = printEnd - printStart
+    putStrLn $ "Printing Time: " ++ show printDiff ++ " seconds"
+
 -- Some graphs to test your work
 gTest1 :: RoadMap
 gTest1 = [("7","6",1),("8","2",2),("6","5",2),("0","1",4),("2","5",4),("8","6",6),("2","3",7),("7","8",7),("0","7",8),("1","2",8),("3","4",9),("5","4",10),("1","7",11),("3","5",14)]
@@ -281,7 +309,7 @@ main = do
             ]
 
     -- Measure and print the time taken for each graph
-    -- mapM_ measureTime testGraphs
+    --mapM_ measureTime testGraphs
 
     -- Run testTiming for each graph with descriptive labels
     putStrLn "Testing timing for gTest1"

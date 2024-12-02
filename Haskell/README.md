@@ -1,95 +1,50 @@
-# Group T16_07
+# PFL - Project 1
 
-![](images/types.png)
+T16_G07
+---
+Maria Eduarda Pacheco Mendes Araújo - up202004473 --> percentagem
 
-- **City** = String --> nome de uma cidade
-- **Path** = Lista de cidades --> sequência de cidades
-- **Distance** = Int --> distância entre duas cidades
-- **RoadMap** = Lista de tuplos --> mapa rodoviário, onde cada tuplo conecta duas cidades e inclui as distências entre elas
+Miguel Ângelo Pacheco Valente - up201704608 --> percentagem
 
-&nbsp;
+---
+## General Description
+In this project we're asked to implement the functions requested, testing the quality and efficiency of the code.
 
-![](images/1.png)
+---
 
-- Função que extrai uma lista de todas as cidades mencionadas no mapa rodoviário, removendo as duplicadas
+## shortestPath function
 
-&nbsp;
+The **shortestPath** funciton is an adaptation of **Dijkstra's algorithm** to find the shortest path between two cities (*start* and *end*) in a *RoadMap*.
 
-![](images/2.png)
 
-- Significa que para cada tuplo no **roadmap**, ele retorna ambos os valores *city1* e *city2*
+### Data Structures:
+- **City** --> *String* --> City name
+- **Path** --> *List* --> Represents a path
+- **Distance** --> *Int* --> Distance between cities
+- **RoadMap** --> *List of tuples* --> Represents direct connections between cities with the respective distance
 
-&nbsp;
+### Helper Funtions:
+- **cities** --> Extracts all unique cities from *RoadMap*
+- **areAdjacent** and **distance** --> Checks adjacency between two cities and retrieves the distance
+- **adjacent** --> Returns all cities directly connected to a specific city along with their respective distances
+- **toAdjList** --> Converts the *RoadMap* into an adjacency list, which facilitates Dijkstra's algorithm
+- **lookupAdjacent** and **lookupDistance** --> Helps access information about direct connections and distances between cities from the adjacency list
 
-![](images/3.png)
+---
 
-- **RoadMap** = Lista de tuplos --> Cada tuplo indica que duas cidades estão conectadas por uma estrada de uma certa distância
-- **City** = String --> Cidades
-- **Bool** = Bool --> Indica se as duas estão diretamente conectadas
+## travelSales function
 
-&nbsp;
+The **travelSales** function provides a solution to the  **Traveling Salesman Problem** (*TSP*) by using *greedy algorithm*.
 
-![](images/4.png)
+**TSP** aims to find the shortest possible route that visits every city exactly once and returns to the starting city.
 
-- A função usa *any*, que verifica se algum elemento de uma lista satisfaz uma condição. Aqui queremos verificar se algum tuplo no **roadmap** corresponde à condição descrita pela função **matches**
+### Data Structures:
+- **City** --> *String* --> City name
+- **Path** --> *List* --> Represents a path
+- **Distance** --> *Int* --> Distance between cities
+- **RoadMap** --> *List of tuples* --> Represents direct connections between cities with the respective distance
 
-&nbsp;
-
-![](images/5.png)
-
-- *x* e *y* são duas cidades conectadas e o terceiro valor *_* é a distância
-- Retorna *True* se a *x* é a mesma que *city1* e *y* a mesma que *city2* ou vice-versa
-
-&nbsp;
-
-![](images/6.png)
-
-- **RoadMap** = Lista de tuplos --> Cada tuplo indica que duas cidades estão conectadas por uma estrada e inclui a distância entre elas
-- **City** --> As duas cidades para as quais queremos saber a distância
-- **Maybe Distance** --> Pode retornar um valor de distância (*Just Distance*) se as cidades estiverem conectadas, ou *Nothing* se isso não se verificar
-
-&nbsp;
-
-![](images/7.png)
-
-- **Data.List.find matches roadmap** --> Procura no roadmap um tuplo (x, y, d) onde *x* e *y* são as cidades e *d* é a distância entre elas. A função **find** retorna o *primeiro elemento* que faz o *match* ou *Nothing* se nenhuma tupla satisfizer a condição
-
-&nbsp;
-
-![](images/8.png)
-
-- **RoadMap** = Lista de tuplos --> Cada tuplo indica que duas cidades estão conectadas uma com a outra e invlui a distância entre elas
-- **City** = String --> Cidade
-
-- A função retorna uma lista de pares *[(City, Distance)]*. Cada par representa uma cidade conectada diretamente à cidade fornecida e a distância entre elas.
-
-&nbsp;
-
-![](images/9.png)
-
-- Percorre o **roadmap** à procura do tuplos onde *x* é a cidade **city** fornecida
-- Para cada tuplo onde *x == city*, retorna o par *(y, d)* qe contém a cidade *y* diretamente conectada a **city** e a distância *d* entre elas
-
-&nbsp;
-
-![](images/10.png)
-
-- **RoadMap** = Lista de tuplos --> indica as cidades conectadas e as distâncias entre elas
-- **Path** = Caminho (lista de cidades) --> Representa a sequência de cidades pelas quais desejamos calcular a distância
-- A função retorna um valor do tipo *Maybe Distance*. Se todas as cidades no caminho estão conectadas, retorna *Just Distance* que contém a distância total. Caso contrário, retorna *Nothing*
-
-&nbsp;
-
-![](images/11.png)
-![](images/12.png)
-
-- Se o *path* estiver vazio ([]) ou se tiver apenas uma cidade (por exemplo, ["A"]), a função retorna *Just 0*
-- Um caminho vazio não tem uma distância associada, então o resultado é zero
-
-&nbsp;
-
-![](images/13.png)
-
-- **distance roadmap city1 city2** --> verificar se as duas primeiras cidades estão diretamente conectadas e, se sim, qual a distância entre elas
-- **Just d** --> Significa que as cidades estão conectadas e que *d* é a distância entre elas
-- **Nothing** --> Significa que não há conexão
+### Helper Functions:
+- **toAdjList** --> Converts the *RoadMap* into an adjacency list format making it easier to access neighboring cities and their distances
+- **lookupAdjacent** --> Finds all cities directly connected to a given city in the adjacency list.
+- **lookupDistance** --> Retrieves the distance between two cities from the adjacency list

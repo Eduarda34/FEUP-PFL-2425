@@ -1,0 +1,12 @@
+site - https://boardgamegeek.com/boardgame/308153/doblin
+
+Descrição:
+Na versão solitária deste jogo, o jogador deve preencher duas grelhas com Os e Xs sem fazer uma linha ou um quadrado com os quatro símbolos iguais. Mas as duas grelhas estão ligadas: ao colocar um símbolo numa grelha, também o coloca noutro lugar da outra grelha.
+
+Utilizando o mesmo mecanismo, a versão multijogador consiste em os jogadores tentarem ter menos linhas e quadrados nas suas grelhas do que os seus adversários.
+
+Tempo: 5 a 20 minutos
+
+Jogadores: 1 a 3
+
+Regras: ver documento "Regras.png"

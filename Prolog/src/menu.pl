@@ -8,18 +8,37 @@ main_menu :-
     handle_option(Option).
 
 handle_option(1) :-
-    write('A entrar no jogo!'), nl,
+    write('a. 1 jogador'), nl,
+    write('b. 2 jogadores'), nl,
+    write('c. 3 jogadores'), nl,
+    read(anotherOp),
+    handle_op(anotherOp).
+
+handle_op(a) :-
+    write('A entrar no jogo - 1 jogador'), nl,
     start_game.
+
+handle_op(b) :-
+    write('A entrar no jogo - 2 jogadores'), nl,
+    start_game.
+
+handle_op(c) :-
+    write('A entrar no jogo - 3 jogadores'), nl,
+    start_game.    
+
 handle_option(2) :-
     write('=== INSTRUÇÕES ==='), nl,
     write('1. X'), nl,
     write('2. Y'), nl,
     main_menu.
+
 handle_option(3) :-
     write('A sair do jogo...'), nl.
+
 handle_option(_) :-
     write('Opção inválida. Tenta novamente.'), nl,
     main_menu.
 
 start_game :-
     write('Bem-vindo ao Doblin!'), nl.
+    %chamar diferentes tabuleiros para os diferentes números de jogadores

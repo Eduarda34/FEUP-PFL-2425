@@ -16,6 +16,23 @@ handle_option(1) :-
 
 handle_op(a) :-
     write('A entrar no jogo - 1 jogador'), nl,
+    write('Escolha a dificuldade do jogo:'), nl,
+    write('1. Fácil'), nl,
+    write('2. Médio'), nl,
+    write('3. Difícil'), nl,
+    read(dificuldade),
+    handle_dif(dificuldade).
+
+handle_dif(1) :-
+    write('Escolheste a dificuldade "Fácil"!'), nl,
+    start_game.
+
+handle_dif(2) :-
+    write('Escolheste a dificuldade "Médio"!'), nl,
+    start_game.
+
+handle_dif(3) :-
+    write('Escolheste a dificuldade "Difícil"!'), nl,
     start_game.
 
 handle_op(b) :-
@@ -26,6 +43,7 @@ handle_op(c) :-
     write('A entrar no jogo - 3 jogadores'), nl,
     start_game.    
 
+%escrever as instruções
 handle_option(2) :-
     write('=== INSTRUÇÕES ==='), nl,
     write('1. X'), nl,
@@ -41,4 +59,5 @@ handle_option(_) :-
 
 start_game :-
     write('Bem-vindo ao Doblin!'), nl.
+    write('Boa sorte!'), nl.
     %chamar diferentes tabuleiros para os diferentes números de jogadores

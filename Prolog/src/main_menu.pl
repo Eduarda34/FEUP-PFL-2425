@@ -27,6 +27,7 @@ handle_option(2) :-
     write('--> Ensure no invalid moves are made.'), nl,
     write('Press any key to exit.'), nl,
     get_char(_),
+    get_char(_),
     main_menu.
 
 handle_option(3) :-

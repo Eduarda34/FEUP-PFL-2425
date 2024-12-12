@@ -22,9 +22,11 @@ handle_option(1) :-
 
 handle_option(2) :-
     write('=== INSTRUCTIONS ==='), nl,
-    write('1. Take turns placing symbols (X or O) on the grid.'), nl,
-    write('2. The first player to form four consecutive symbols in a row, column, or diagonal wins.'), nl,
-    write('3. Ensure no invalid moves are made.'), nl,
+    write('--> Take turns placing symbols (X or O) on the grid.'), nl,
+    write('--> The first player to form four consecutive symbols in a row, column, or diagonal wins.'), nl,
+    write('--> Ensure no invalid moves are made.'), nl,
+    write('Press any key to exit.'), nl,
+    get_char(_),
     main_menu.
 
 handle_option(3) :-

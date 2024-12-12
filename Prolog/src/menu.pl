@@ -8,13 +8,13 @@ main_menu :-
     handle_option(Option).
 
 handle_option(1) :-
-    write('a. 1 jogador'), nl,
-    write('b. 2 jogadores'), nl,
-    write('c. 3 jogadores'), nl,
+    write('1. 1 jogador'), nl,
+    write('2. 2 jogadores'), nl,
+    write('3. 3 jogadores'), nl,
     read(anotherOp),
     handle_op(anotherOp).
 
-handle_op(a) :-
+handle_op(1) :-
     write('A entrar no jogo - 1 jogador'), nl,
     write('Escolha a dificuldade do jogo:'), nl,
     write('1. Fácil'), nl,
@@ -22,6 +22,14 @@ handle_op(a) :-
     write('3. Difícil'), nl,
     read(dificuldade),
     handle_dif(dificuldade).
+
+handle_op(2) :-
+write('A entrar no jogo - 2 jogadores'), nl,
+start_game.
+
+handle_op(3) :-
+    write('A entrar no jogo - 3 jogadores'), nl,
+    start_game.    
 
 handle_dif(1) :-
     write('Escolheste a dificuldade "Fácil"!'), nl,
@@ -35,13 +43,6 @@ handle_dif(3) :-
     write('Escolheste a dificuldade "Difícil"!'), nl,
     start_game.
 
-handle_op(b) :-
-    write('A entrar no jogo - 2 jogadores'), nl,
-    start_game.
-
-handle_op(c) :-
-    write('A entrar no jogo - 3 jogadores'), nl,
-    start_game.    
 
 %escrever as instruções
 handle_option(2) :-

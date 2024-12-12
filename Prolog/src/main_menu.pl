@@ -14,9 +14,9 @@ main_menu :-
 
 handle_option(1) :-
     write('Choose the number of players:'), nl,
-    write('a. 1 Player'), nl,
-    write('b. 2 Players'), nl,
-    write('c. 3 Players'), nl,
+    write('1. 1 Player'), nl,
+    write('2. 2 Players'), nl,
+    write('3. 3 Players'), nl,
     read(Choice),
     handle_players(Choice).
 
@@ -34,15 +34,15 @@ handle_option(_) :-
     write('Invalid option, try again.'), nl,
     main_menu.
 
-handle_players(a) :-
+handle_players(1) :-
     write('Single-player mode is not implemented yet.'), nl,
     main_menu.
 
-handle_players(b) :-
+handle_players(2) :-
     write('Starting 2-player mode.'), nl,
     init_grid(6, Grid), % Initialize 6x6 grid
     play_game(Grid, 'X').
 
-handle_players(c) :-
+handle_players(3) :-
     write('3-player mode is not implemented yet.'), nl,
     main_menu.

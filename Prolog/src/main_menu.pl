@@ -12,6 +12,7 @@ main_menu :-
     read(Option),
     handle_option(Option).
 
+%Main Menu - Número de jogadores
 handle_option(1) :-
     write('Choose the number of players:'), nl,
     write('1. 1 Player'), nl,
@@ -20,6 +21,7 @@ handle_option(1) :-
     read(Choice),
     handle_players(Choice).
 
+%Main Menu - Instruções
 handle_option(2) :-
     write('=== INSTRUCTIONS ==='), nl,
     write('--> Take turns placing symbols (X or O) on the grid.'), nl,
@@ -30,22 +32,27 @@ handle_option(2) :-
     get_char(_),
     main_menu.
 
+%Main Menu - Sair do jogo
 handle_option(3) :-
     write('Exiting the game...'), nl.
 
+%Main Menu - Opção inválida
 handle_option(_) :-
     write('Invalid option, try again.'), nl,
     main_menu.
 
+%Número de jogadores - 1 jogador
 handle_players(1) :-
     write('Single-player mode is not implemented yet.'), nl,
     main_menu.
 
+%Número de jogadores - 2 jogadores
 handle_players(2) :-
     write('Starting 2-player mode.'), nl,
     init_grid(6, Grid), % Initialize 6x6 grid
     play_game(Grid, 'X').
 
+%Número de jogadores - 3 jogadores
 handle_players(3) :-
     write('3-player mode is not implemented yet.'), nl,
     main_menu.

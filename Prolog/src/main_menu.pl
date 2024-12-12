@@ -27,7 +27,11 @@ handle_option(2) :-
     write('--> Ensure no invalid moves are made.'), nl,
     write('Press any key to exit.'), nl,
     get_char(_),
+    clear_screen,
     main_menu.
+
+clear_screen :-
+    write('\e[H\e[2J'). 
 
 handle_option(3) :-
     write('Exiting the game...'), nl.

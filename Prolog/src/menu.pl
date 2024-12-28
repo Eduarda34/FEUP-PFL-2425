@@ -1,11 +1,11 @@
-/* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
+/* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
 main_menu :-
     write('=== MENU ==='), nl,
     write('1. Iniciar jogo'), nl,
-    write('2. Ver instruções'), nl,
+    write('2. Ver instruÃ§Ãµes'), nl,
     write('3. Sair'), nl,
-    write('Escolhe uma opção: '),
+    write('Escolhe uma opÃ§Ã£o: '),
     read(Option),
     handle_option(Option).
 
@@ -17,7 +17,7 @@ handle_option(1) :-
     handle_op(AnotherOp).
 
 handle_option(2) :-
-    write('=== INSTRUÇÕES ==='), nl,
+    write('=== INSTRUÃ‡Ã•ES ==='), nl,
     write('1. X'), nl,
     write('2. Y'), nl,
     main_menu.
@@ -26,15 +26,15 @@ handle_option(3) :-
     write('A sair do jogo...'), nl.
 
 handle_option(_) :-
-    write('Opção inválida. Tenta novamente.'), nl,
+    write('OpÃ§Ã£o invÃ¡lida. Tenta novamente.'), nl,
     main_menu.
 
 handle_op(1) :-
     write('A entrar no jogo - 1 jogador'), nl,
     write('Escolha a dificuldade do jogo:'), nl,
-    write('1. Fácil'), nl,
-    write('2. Médio'), nl,
-    write('3. Difícil'), nl,
+    write('1. FÃ¡cil'), nl,
+    write('2. MÃ©dio'), nl,
+    write('3. DifÃ­cil'), nl,
     read(Dificuldade),
     handle_dif(Dificuldade).
 
@@ -47,18 +47,18 @@ handle_op(3) :-
     start_game.
 
 handle_dif(1) :-
-    write('Escolheste a dificuldade "Fácil"!'), nl,
+    write('Escolheste a dificuldade "FÃ¡cil"!'), nl,
     start_game.
 
 handle_dif(2) :-
-    write('Escolheste a dificuldade "Médio"!'), nl,
+    write('Escolheste a dificuldade "MÃ©dio"!'), nl,
     start_game.
 
 handle_dif(3) :-
-    write('Escolheste a dificuldade "Difícil"!'), nl,
+    write('Escolheste a dificuldade "DifÃ­cil"!'), nl,
     start_game.
 
 start_game :-
     write('Bem-vindo ao Doblin!'), nl,
     write('Boa sorte!'), nl.
-    % chamar diferentes tabuleiros para diferentes números de jogadores
+    % chamar diferentes tabuleiros para diferentes nÃºmeros de jogadores

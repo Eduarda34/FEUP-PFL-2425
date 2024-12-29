@@ -1,5 +1,6 @@
 /* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
+:-use_module(singleplayer).
 :- consult(grid).
 :- consult(validation).
 :- consult(game).
@@ -45,8 +46,7 @@ handle_option(_) :-
 
 %Número de jogadores - 1 jogador
 handle_players(1) :-
-    write('Single-player mode is not implemented yet.'), nl,
-    main_menu.
+        play_singleplayer.
 
 %Número de jogadores - 2 jogadores
 handle_players(2) :-

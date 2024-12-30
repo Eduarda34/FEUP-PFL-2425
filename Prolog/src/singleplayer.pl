@@ -7,33 +7,52 @@
 
 :- use_module(singleplayer_grid).
 :- use_module(singleplayer_normal_difficulty).
-:- use_module(singleplayer_data).
 
-
+/* 
+    Predicado principal para iniciar o jogo.
+*/
 play_singleplayer :-
-    init_boards, 
+    init_boards(Game), 
     write('Welcome to Singleplayer Mode!'), nl,
     write('The symbols X and O will alternate automatically.'), nl,
     nl,
-    game_loop('X').
+    game_loop(Game, 'X').
 
 
-game_loop(Symbol) :-
-    print_boards,
+/* 
+    Loop principal do jogo.
+    game_loop(+GameState, +CurrentSymbol)
+*/
+game_loop(Game, Symbol) :-
+    print_boards(Game),
     format('~w Turn.~n', [Symbol]),
     prompt_move(Row, Col),
-    (   pick_space(Row, Col, Symbol) ->
-        (   player_loses ->
-            print_boards,
-            format('You lost the game due to a losing condition with the symbol ~w.~n', [Symbol])
-        ;   player_wins ->
-            print_boards,
-            write('Congratulations! You won the game.'), nl
-        ;   next_symbol(Symbol, NextSymbol),
-            game_loop(NextSymbol)
+    (
+        % Tentar fazer a jogada.
+        % pick_space(+Row, +Col, +Symbol, +Game, -NewGame)
+        pick_space(Row, Col, Symbol, Game, NewGame)
+    ->
+        (
+            % Verificar o status do jogo após a jogada.
+            game_status(NewGame, Status),
+            (
+                Status = won
+            ->
+                print_boards(NewGame),
+                write('Congratulations! You won the game.'), nl
+            ;   Status = lost
+            ->
+                print_boards(NewGame),
+                format('You lost the game due to a losing condition with the symbol ~w.~n', [Symbol]), nl
+            ;   % Caso o jogo continue, alternar o símbolo e continuar o loop.
+                next_symbol(Symbol, NextSymbol),
+                game_loop(NewGame, NextSymbol)
+            )
         )
-    ;   write('Invalid move. Try again.'), nl,
-        game_loop(Symbol)
+    ;
+        % Se a jogada for inválida, informar e reiniciar o loop com o mesmo símbolo.
+        write('Invalid move. Try again.'), nl,
+        game_loop(Game, Symbol)
     ).
 
 

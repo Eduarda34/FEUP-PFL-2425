@@ -1,117 +1,178 @@
 /* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
 :- module(singleplayer_grid,
-          [ init_boards/0,
-            pick_space/3,
-            print_boards/0
+          [ init_boards/1,
+            pick_space/5,
+            print_boards/1,
+            get_board/3,
+            get_symbol/5
+               
           ]).
-
+    
 :- use_module(library(random)). 
 :- use_module(library(lists)).
-:- use_module(singleplayer_data).
 :- use_module(singleplayer_normal_difficulty).
 
 /*
    cell(BoardID, RowLabel, ColLabel, Symbol).
-   Example: cell(1, a, 1, '.') => Board #1 at (A,1) has '.'.
+   Exemplo: cell(1, a, 1, '.') => Tabuleiro #1 na posição (A,1) contém '.'.
 
-   board2_rows/1 and board2_cols/1 store the *random* row/col order for Board #2.
+   board2_rows e board2_cols são gerenciados na estrutura de estado.
 */
 
-/* ----------------------------------------------------------------------
-   1. INITIALIZATION
-   ---------------------------------------------------------------------- */
 
-%% init_boards/0
-%%   1) Clears old data (cells, plus board2_rows/1, board2_cols/1)
-%%   2) Creates Board #1 in normal order
-%%   3) Creates Board #2 with random row/col ordering
-init_boards :-
-    retractall(cell(_,_,_,_)),
-    retractall(board_rows(2,_)),
-    retractall(board_cols(2,_)),
+/* 
+   Representação do Estado do Jogo:
+   game(Board1, Board2)
 
-    % Board #2: pick a random ordering of A–F, 1–6
-    board_rows(1,AllRows),
-    board_cols(1,AllCols),
-    random_shuffled_list(AllRows, RndRows),
-    random_shuffled_list(AllCols, RndCols),
-    assertz(board_rows(2,RndRows)),
-    assertz(board_cols(2,RndCols)),
+   Board:
+   board(BoardID, Rows, Cols, Cells)
 
-    % Now actually build the cell(...) facts for both boards:
-    create_boards.
+   Cells é uma lista de cell(Row, Col, Symbol).
+*/
 
-%% create_board(+BoardID)
-%%   Fills the 6×6 grid with '.' for that board,
-%%   in whatever row/col labeling that board uses.
-create_boards :-
-        board_rows(1,Rs1),
-        board_cols(1,Cs1),
-        board_rows(2,Rs2),
-        board_cols(2,Cs2),
-        fill_cells(1, Rs1, Cs1),
-        fill_cells(2, Rs2, Cs2).
+board1_rows([a,b,c,d,e,f]).
+board1_cols([1,2,3,4,5,6]).
 
-fill_cells(_, [], _).
-fill_cells(BoardID, [R|Rs], Cols) :-
-    fill_one_row(BoardID, R, Cols),
-    fill_cells(BoardID, Rs, Cols).
+%% random_shuffled_list(+List, -Shuffled)
+%% Shuffles List using random_select/3.
+random_shuffled_list([], []).
+random_shuffled_list(List, [X|Xs]) :-
+    random_select(X, List, Rest),
+    random_shuffled_list(Rest, Xs).
 
-fill_one_row(_, _, []).
-fill_one_row(BoardID, RowLabel, [C|Cs]) :-
-    assertz(cell(BoardID, RowLabel, C, '.')),
-    fill_one_row(BoardID, RowLabel, Cs).
+% get_board(+Game, +BoardID, -Board)
+get_board(game(Board1, _), 1, Board1).
+get_board(game(_, Board2), 2, Board2).
 
-/* ----------------------------------------------------------------------
-   2. PICKING A SPACE (COORDINATE) AND PLACING A SYMBOL
-   ---------------------------------------------------------------------- */
+% get_symbol(+Game, +BoardID, +Row, +Col, -Symbol)
+get_symbol(game(Board1, Board2), BoardID, Row, Col, Symbol) :-
+    get_board(game(Board1, Board2), BoardID, board(BoardID, _, _, Cells)),
+    member(cell(Row, Col, Symbol), Cells).
 
-%% pick_space(+RowLabel, +ColLabel, +Symbol)
-%%   Place Symbol in (RowLabel,ColLabel) on Board #1 or #2
-%%   *and* the same coordinate on the other board.
-pick_space(RowLabel, ColLabel, Symbol) :-
-    valid_cell(1, RowLabel, ColLabel),
-    update_cell(1, RowLabel, ColLabel, Symbol),
-    update_cell(2, RowLabel, ColLabel, Symbol).
+%% init_boards(-State)
+%% Inicializa os tabuleiros.
+init_boards(game(Board1, Board2)) :-
+    % Inicializar Tabuleiro #1 com ordem normal
+    board1_rows(Rows1),
+    board1_cols(Cols1),
+    initialize_cells(Rows1, Cols1, Cells1),
+    Board1 = board(1, Rows1, Cols1, Cells1),
+    
+    % Inicializar Tabuleiro #2 com ordem aleatória
+    board1_rows(AllRows),  % Reutilizando as mesmas linhas para embaralhar
+    board1_cols(AllCols),  % Reutilizando as mesmas colunas para embaralhar
+    random_shuffled_list(AllRows, ShuffledRows2),
+    random_shuffled_list(AllCols, ShuffledCols2),
+    initialize_cells(ShuffledRows2, ShuffledCols2, Cells2),
+    Board2 = board(2, ShuffledRows2, ShuffledCols2, Cells2).
 
-
-update_cell(BoardID, R, C, Sym) :-
-    retractall(cell(BoardID, R, C, _)),
-    assertz(cell(BoardID, R, C, Sym)).
+%% initialize_cells(+Rows, +Cols, -Cells)
+%% Inicializa as células com o símbolo '.'.
+initialize_cells(Rows, Cols, Cells) :-
+    findall(cell(R, C, '.'), (member(R, Rows), member(C, Cols)), Cells).
 
 /* ----------------------------------------------------------------------
-   3. PRINTING THE BOARDS
+   2. SELEÇÃO DE ESPAÇO (COORDENADA) E COLOCAÇÃO DE SÍMBOLO
    ---------------------------------------------------------------------- */
-print_boards :-
-        board_rows(1,Rs1),
-        board_cols(1,Cs1),
-        board_rows(2,Rs2),
-        board_cols(2,Cs2),
-        print_col_header(Cs1),
-        print_rows(1, Rs1, Cs1),
-        print_col_header(Cs2),
-        print_rows(2, Rs2, Cs2).
-        
+
+/* 
+   pick_space(+RowLabel, +ColLabel, +Symbol, +State, -NewState)
+   Coloca o Symbol na posição (RowLabel, ColLabel) nos Tabuleiros #1 e #2.
+*/
+
+%% Definir símbolos válidos
+valid_symbol('X').
+valid_symbol('O').
+valid_symbol('.').
+% Adicione mais símbolos conforme necessário
+
+pick_space(RowLabel, ColLabel, Symbol, game(Board1, Board2), game(NewBoard1, NewBoard2)) :-
+    valid_symbol(Symbol),
+    % Verifica se a célula é válida e está vazia no Tabuleiro #1
+    (   valid_cell(Board1, RowLabel, ColLabel)
+    ->  % Atualiza Tabuleiro #1
+        update_board(Board1, RowLabel, ColLabel, Symbol, NewBoard1),
+        % Atualiza Tabuleiro #2
+        update_board(Board2, RowLabel, ColLabel, Symbol, NewBoard2)
+    ;   % Se a célula não for válida ou já estiver ocupada
+        fail
+    ).
+
+
+%% update_board(+Board, +Row, +Col, +Symbol, -NewBoard)
+%% Atualiza a célula especificada com o novo símbolo.
+update_board(board(ID, Rows, Cols, Cells), Row, Col, Symbol, board(ID, Rows, Cols, NewCells)) :-
+    maplist(update_cell(Row, Col, Symbol), Cells, NewCells).
+
+%% update_cell(+Row, +Col, +Symbol, +cell(R, C, S), -NewCell)
+%% Substitui o símbolo se a linha e a coluna corresponderem.
+update_cell(Row, Col, Symbol, cell(R, C, S), cell(R, C, NewS)) :-
+    (   R = Row, C = Col
+    ->  NewS = Symbol
+    ;   NewS = S
+    ).
+
+/* ----------------------------------------------------------------------
+   3. IMPRESSÃO DOS TABULEIROS
+   ---------------------------------------------------------------------- */
+
+/* 
+   print_boards(+State)
+   Imprime ambos os tabuleiros.
+*/
+
+print_boards(game(Board1, Board2)) :-
+    print_board(Board1),
+    nl,
+    print_board(Board2).
+
+%% print_board(+Board)
+%% Imprime um único tabuleiro.
+print_board(board(ID, Rows, Cols, Cells)) :-
+    format('--- Board ~w ---~n', [ID]),
+    print_col_header(Cols),
+    print_rows(Rows, Cols, Cells).
+
+%% print_col_header(+Cols)
+%% Imprime o cabeçalho das colunas.
 print_col_header(Cols) :-
-    write(' '),
+    write('   '),
     print_cols(Cols),
+    nl,
+    write('  '),
+    print_separator(Cols),
     nl.
 
+%% print_cols(+Cols)
+%% Imprime cada coluna com espaçamento.
 print_cols([]).
 print_cols([C|Cs]) :-
-    format('  ~w ', [C]),
+    format(' ~w ', [C]),
     print_cols(Cs).
 
-print_rows(_, [], _).
-print_rows(BoardID, [R|Rs], Cols) :-
-    format(' ~w ', [R]),
-    print_cells(BoardID, R, Cols),
-    nl,
-    print_rows(BoardID, Rs, Cols).
+%% print_separator(+Cols)
+%% Imprime uma linha separadora após o cabeçalho das colunas.
+print_separator([]).
+print_separator([_|Cs]) :-
+    write('---'),
+    print_separator(Cs).
 
-print_cells(_, _, []).
-print_cells(BoardID, RowLabel, [C|Cs]) :-
-    cell(BoardID, RowLabel, C, Symbol),
-    format(' ~w ', [Symbol]),
-    print_cells(BoardID, RowLabel, Cs).
+%% print_rows(+Rows, +Cols, +Cells)
+%% Imprime cada linha do tabuleiro.
+print_rows([], _, _).
+print_rows([R|Rs], Cols, Cells) :-
+    format('~w |', [R]),
+    print_cells(R, Cols, Cells),
+    nl,
+    print_rows(Rs, Cols, Cells).
+
+%% print_cells(+Row, +Cols, +Cells)
+%% Imprime os símbolos das células em uma linha específica.
+print_cells(_, [], _).
+print_cells(Row, [C|Cs], Cells) :-
+    (   member(cell(Row, C, Symbol), Cells)
+    ->  format(' ~w ', [Symbol])
+    ;   format(' ~w ', [' . '])
+    ),
+    print_cells(Row, Cs, Cells).

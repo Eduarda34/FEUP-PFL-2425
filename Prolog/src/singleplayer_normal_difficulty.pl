@@ -2,110 +2,193 @@
 
 :- module(singleplayer_normal_difficulty,
           [ valid_cell/3,
-            player_loses/0,
-            player_wins/0
+            game_status/2
           ]).
 
-:- use_module(singleplayer_data).
+:- use_module(singleplayer_grid).
+:- use_module(library(between)).
+:- use_module(library(lists)).
 
 % valid_cell(BoardID, RowLabel, ColLabel)
 % Ensures the cell contains '.'
-valid_cell(BoardID, RowLabel, ColLabel) :-
-    cell(BoardID, RowLabel, ColLabel, '.').
+valid_cell(board(_, Rows, Cols, Cells), Row, Col) :-
+    member(Row, Rows),
+    member(Col, Cols),
+    member(cell(Row, Col, '.'), Cells).
 
+% adjacent_pair(+List, -First, -Second)
+% Verifica se First e Second são elementos adjacentes em List.
 adjacent_pair([First, Second | _], First, Second).
 adjacent_pair([_ | Rest], First, Second) :-
     adjacent_pair(Rest, First, Second).
 
-% has_four_horizontal(+BoardID)
-% Succeeds if the specified board has at least one horizontal four-in-a-row.
-has_four_horizontal(BoardID) :-
-    board_rows(BoardID, Rows),
-    board_cols(BoardID, Cols),
+% has_four_horizontal(+Game, +BoardID)
+% Succeeds se o tabuleiro especificado tiver pelo menos uma sequência horizontal de quatro símbolos iguais.
+has_four_horizontal(Game, BoardID) :-
+    get_board(Game, BoardID, board(BoardID, Rows, Cols, _)),
     member(Row, Rows),
-    consecutive_four(Row, Cols, Symbol),
+    consecutive_four(Game, BoardID, Row, Cols, Symbol),
     Symbol \= '.'.
 
-% consecutive_four(+RowLabel, +Cols, -Symbol)
-% Checks if there are four consecutive cells in the row with the same non-dot symbol.
-consecutive_four(Row, Cols, Symbol) :-
-    append(_, [C1, C2, C3, C4 | _], Cols),
-    cell(BoardID, Row, C1, Symbol),
-    cell(BoardID, Row, C2, Symbol),
-    cell(BoardID, Row, C3, Symbol),
-    cell(BoardID, Row, C4, Symbol).
+% consecutive_four(+Game, +BoardID, +Row, +Cols, -Symbol)
+% Verifica se há quatro células consecutivas na linha com o mesmo símbolo não vazio.
+consecutive_four(Game, BoardID, Row, [C1, C2, C3, C4 | _], Symbol) :-
+    get_symbol(Game, BoardID, Row, C1, Symbol),
+    get_symbol(Game, BoardID, Row, C2, Symbol),
+    get_symbol(Game, BoardID, Row, C3, Symbol),
+    get_symbol(Game, BoardID, Row, C4, Symbol).
 
-% has_four_vertical(+BoardID)
-% Succeeds if the specified board has at least one vertical four-in-a-row.
-has_four_vertical(BoardID) :-
-    board_cols(BoardID, Cols),
-    board_rows(BoardID, Rows),
+consecutive_four(Game, BoardID, Row, [_ | RestCols], Symbol) :-
+    consecutive_four(Game, BoardID, Row, RestCols, Symbol).
+
+% has_four_vertical(+Game, +BoardID)
+% Succeeds se o tabuleiro especificado tiver pelo menos uma sequência vertical de quatro símbolos iguais.
+has_four_vertical(Game, BoardID) :-
+    get_board(Game, BoardID, board(BoardID, Rows, Cols, _)),
     member(Col, Cols),
-    consecutive_four_vertical(Col, Rows, Symbol),
+    consecutive_four_vertical(Game, BoardID, Col, Rows, Symbol),
     Symbol \= '.'.
 
-% consecutive_four_vertical(+ColLabel, +Rows, -Symbol)
-% Checks if there are four consecutive cells in the column with the same non-dot symbol.
-consecutive_four_vertical(Col, Rows, Symbol) :-
-    append(_, [R1, R2, R3, R4 | _], Rows),
-    cell(BoardID, R1, Col, Symbol),
-    cell(BoardID, R2, Col, Symbol),
-    cell(BoardID, R3, Col, Symbol),
-    cell(BoardID, R4, Col, Symbol).
+% consecutive_four_vertical(+Game, +BoardID, +Col, +Rows, -Symbol)
+% Verifica se há quatro células consecutivas na coluna com o mesmo símbolo não vazio.
+consecutive_four_vertical(Game, BoardID, Col, [R1, R2, R3, R4 | _], Symbol) :-
+    get_symbol(Game, BoardID, R1, Col, Symbol),
+    get_symbol(Game, BoardID, R2, Col, Symbol),
+    get_symbol(Game, BoardID, R3, Col, Symbol),
+    get_symbol(Game, BoardID, R4, Col, Symbol).
 
-% has_four_diagonal(+BoardID)
-% Succeeds if the specified board has at least one diagonal four-in-a-row.
-has_four_diagonal(BoardID) :-
-    board_rows(BoardID, Rows),
-    board_cols(BoardID, Cols),
-    append(_, [R1, R2, R3, R4 | _], Rows),
-    append(_, [C1, C2, C3, C4 | _], Cols),
-    % Check main diagonal
-    cell(BoardID, R1, C1, Symbol),
-    cell(BoardID, R2, C2, Symbol),
-    cell(BoardID, R3, C3, Symbol),
-    cell(BoardID, R4, C4, Symbol),
+consecutive_four_vertical(Game, BoardID, Col, [_ | RestRows], Symbol) :-
+    consecutive_four_vertical(Game, BoardID, Col, RestRows, Symbol).
+
+% has_four_diagonal(+Game, +BoardID)
+% Succeeds se o tabuleiro especificado tiver pelo menos uma sequência diagonal de quatro símbolos iguais.
+has_four_diagonal(Game, BoardID) :-
+    get_board(Game, BoardID, board(BoardID, Rows, Cols, _)),
+    length(Rows, NRows),
+    length(Cols, NCols),
+
+    % Diagonais principais (top-left to bottom-right)
+    MaxRow is NRows - 3,
+    MaxCol is NCols - 3,
+    between(1, MaxRow, StartRowNum),
+    between(1, MaxCol, StartColNum),
+    check_diagonal(Game, BoardID, StartRowNum, StartColNum, Symbol),
     Symbol \= '.'.
 
-% Alternatively, check the anti-diagonal
-has_four_diagonal(BoardID) :-
-    board_rows(BoardID, Rows),
-    board_cols(BoardID, Cols),
-    append(_, [R1, R2, R3, R4 | _], Rows),
-    append(_, [C4, C3, C2, C1 | _], Cols),
-    cell(BoardID, R1, C1, Symbol),
-    cell(BoardID, R2, C2, Symbol),
-    cell(BoardID, R3, C3, Symbol),
-    cell(BoardID, R4, C4, Symbol),
+has_four_diagonal(Game, BoardID) :-
+    get_board(Game, BoardID, board(BoardID, Rows, Cols, _)),
+    length(Rows, NRows),
+    length(Cols, NCols),
+
+    % Diagonais secundárias (top-right to bottom-left)
+    MaxRow is NRows - 3,
+    between(1, MaxRow, StartRowNum),
+    between(4, NCols, StartColNum),
+    check_antidiagonal(Game, BoardID, StartRowNum, StartColNum, Symbol),
     Symbol \= '.'.
 
-% has_square(+BoardID)
-% Succeeds if the specified board has at least one 2x2 square of the same non-dot symbol.
-has_square(BoardID) :-
-    board_rows(BoardID, Rows),
-    board_cols(BoardID, Cols),
+% check_diagonal(+Game, +BoardID, +StartRowNum, +StartColNum, -Symbol)
+% Verifica uma sequência diagonal principal de quatro símbolos iguais a partir de (StartRow, StartCol).
+check_diagonal(Game, BoardID, StartRowNum, StartColNum, Symbol) :-
+    get_board(Game, BoardID, board(BoardID, Rows, Cols, _)),
+    nth1(StartRowNum, Rows, Row1),
+    nth1(StartColNum, Cols, Col1),
+
+    R2 is StartRowNum + 1,
+    C2 is StartColNum + 1,
+    nth1(R2, Rows, Row2),
+    nth1(C2, Cols, Col2),
+
+    R3 is R2 + 1,
+    C3 is C2 + 1,
+    nth1(R3, Rows, Row3),
+    nth1(C3, Cols, Col3),
+
+    R4 is R3 + 1,
+    C4 is C3 + 1,
+    nth1(R4, Rows, Row4),
+    nth1(C4, Cols, Col4),
+
+    get_symbol(Game, BoardID, Row1, Col1, Symbol),
+    get_symbol(Game, BoardID, Row2, Col2, Symbol),
+    get_symbol(Game, BoardID, Row3, Col3, Symbol),
+    get_symbol(Game, BoardID, Row4, Col4, Symbol).
+
+% check_antidiagonal(+Game, +BoardID, +StartRowNum, +StartColNum, -Symbol)
+% Verifica uma sequência diagonal secundária de quatro símbolos iguais a partir de (StartRow, StartCol).
+check_antidiagonal(Game, BoardID, StartRowNum, StartColNum, Symbol) :-
+    get_board(Game, BoardID, board(BoardID, Rows, Cols, _)),
+    nth1(StartRowNum, Rows, Row1),
+    nth1(StartColNum, Cols, Col1),
+
+    R2 is StartRowNum + 1,
+    C2 is StartColNum - 1,
+    nth1(R2, Rows, Row2),
+    nth1(C2, Cols, Col2),
+
+    R3 is R2 + 1,
+    C3 is C2 - 1,
+    nth1(R3, Rows, Row3),
+    nth1(C3, Cols, Col3),
+
+    R4 is R3 + 1,
+    C4 is C3 - 1,
+    nth1(R4, Rows, Row4),
+    nth1(C4, Cols, Col4),
+
+    get_symbol(Game, BoardID, Row1, Col1, Symbol),
+    get_symbol(Game, BoardID, Row2, Col2, Symbol),
+    get_symbol(Game, BoardID, Row3, Col3, Symbol),
+    get_symbol(Game, BoardID, Row4, Col4, Symbol).
+
+
+
+% has_square(+Game, +BoardID)
+% Succeeds se o tabuleiro especificado tiver pelo menos um quadrado 2x2 de símbolos iguais.
+has_square(Game, BoardID) :-
+    get_board(Game, BoardID, board(BoardID, Rows, Cols, _)),
     adjacent_pair(Rows, R1, R2),
     adjacent_pair(Cols, C1, C2),
-    cell(BoardID, R1, C1, Symbol),
+    get_symbol(Game, BoardID, R1, C1, Symbol),
     Symbol \= '.',
-    cell(BoardID, R1, C2, Symbol),
-    cell(BoardID, R2, C1, Symbol),
-    cell(BoardID, R2, C2, Symbol),
-    !.  % Cut to prevent backtracking after finding the first square.
+    get_symbol(Game, BoardID, R1, C2, Symbol),
+    get_symbol(Game, BoardID, R2, C1, Symbol),
+    get_symbol(Game, BoardID, R2, C2, Symbol),
+    !.  % Cut para evitar backtracking após encontrar o primeiro quadrado.
 
-% has_losing_condition(+BoardID)
-% Succeeds if the specified board meets any losing condition.
-has_losing_condition(BoardID) :-
-    has_four_horizontal(BoardID);
-    has_four_vertical(BoardID);
-    has_four_diagonal(BoardID);
-    has_square(BoardID).
+% has_losing_condition(+Game, +BoardID)
+% Succeeds se o tabuleiro especificado atender a qualquer condição de perda.
+has_losing_condition(Game, BoardID) :-
+    has_four_horizontal(Game, BoardID);
+    has_four_vertical(Game, BoardID);
+    has_four_diagonal(Game, BoardID);
+    has_square(Game, BoardID).
 
-% Succeeds if player has losing conditions.
-player_loses :-
-    ( has_losing_condition(1) ; has_losing_condition(2) ).
+% player_loses(+Game)
+% Succeeds se qualquer um dos tabuleiros atender a condições de perda.
+player_loses(Game) :-
+    has_losing_condition(Game, 1);
+    has_losing_condition(Game, 2).
 
-% Succeeds if player's boards are complete.
-player_wins :-
-    \+ (cell(1, _, _, '.')),
-    \+ (cell(2, _, _, '.')).
+% player_wins(+Game)
+% Succeeds se ambos os tabuleiros estiverem completos (sem células vazias).
+player_wins(Game) :-
+    get_board(Game, 1, board(1, _, _, Cells1)),
+    get_board(Game, 2, board(2, _, _, Cells2)),
+    \+ member(cell(_, _, '.'), Cells1),
+    \+ member(cell(_, _, '.'), Cells2).
+
+
+% game_status(+Game, -Status)
+% Verifica o status do jogo baseado no estado atual.
+% Status pode ser 'ongoing', 'won', 'lost'.
+game_status(Game, Status) :-
+    (
+        player_loses(Game)
+    ->
+        Status = lost
+    ;   player_wins(Game)
+    ->
+        Status = won
+    ;   Status = ongoing
+    ).

@@ -34,7 +34,7 @@ game_loop(Game, Symbol) :-
     ->
         (
             % Verificar o status do jogo após a jogada.
-            game_status(NewGame, Status),
+            singleplayer_game_over(NewGame, Status),
             (
                 Status = won
             ->

@@ -5,7 +5,10 @@
             pick_space/5,
             print_boards/1,
             get_board/3,
-            get_symbol/5
+            get_symbol/5,
+            print_col_header/1,
+            print_rows/3,
+            print_boards/2
                
           ]).
     
@@ -31,8 +34,8 @@
    Cells é uma lista de cell(Row, Col, Symbol).
 */
 
-board1_rows([a,b,c,d,e,f]).
-board1_cols([1,2,3,4,5,6]).
+default_rows([a,b,c,d,e,f]).
+default_cols([1,2,3,4,5,6]).
 
 %% random_shuffled_list(+List, -Shuffled)
 %% Shuffles List using random_select/3.
@@ -53,15 +56,12 @@ get_symbol(game(Board1, Board2), BoardID, Row, Col, Symbol) :-
 %% init_boards(-State)
 %% Inicializa os tabuleiros.
 init_boards(game(Board1, Board2)) :-
-    % Inicializar Tabuleiro #1 com ordem normal
-    board1_rows(Rows1),
-    board1_cols(Cols1),
-    initialize_cells(Rows1, Cols1, Cells1),
-    Board1 = board(1, Rows1, Cols1, Cells1),
-    
-    % Inicializar Tabuleiro #2 com ordem aleatória
-    board1_rows(AllRows),  % Reutilizando as mesmas linhas para embaralhar
-    board1_cols(AllCols),  % Reutilizando as mesmas colunas para embaralhar
+    default_rows(AllRows),
+    default_cols(AllCols),
+    random_shuffled_list(AllRows, ShuffledRows1),
+    random_shuffled_list(AllCols, ShuffledCols1),
+    initialize_cells(ShuffledRows1, ShuffledCols1, Cells1),
+    Board1 = board(1, ShuffledRows1, ShuffledCols1, Cells1),
     random_shuffled_list(AllRows, ShuffledRows2),
     random_shuffled_list(AllCols, ShuffledCols2),
     initialize_cells(ShuffledRows2, ShuffledCols2, Cells2),
@@ -117,15 +117,23 @@ update_cell(Row, Col, Symbol, cell(R, C, S), cell(R, C, NewS)) :-
    3. IMPRESSÃO DOS TABULEIROS
    ---------------------------------------------------------------------- */
 
+print_boards(game(Board1, Board2),_) :-
+    print_board(Board1,'1'),
+    nl,
+    print_board(Board2,'2').
 /* 
    print_boards(+State)
    Imprime ambos os tabuleiros.
 */
-
 print_boards(game(Board1, Board2)) :-
     print_board(Board1),
     nl,
     print_board(Board2).
+
+print_board(board(_, Rows, Cols, Cells),Player) :-
+    format('--- Player ~w ---~n', [Player]),
+    print_col_header(Cols),
+    print_rows(Rows, Cols, Cells).
 
 %% print_board(+Board)
 %% Imprime um único tabuleiro.

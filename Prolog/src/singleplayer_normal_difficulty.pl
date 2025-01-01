@@ -2,7 +2,9 @@
 
 :- module(singleplayer_normal_difficulty,
           [ valid_cell/3,
-            game_status/2
+            singleplayer_game_over/2,
+            update_player_score/3,
+            multiplayer_game_over/3
           ]).
 
 :- use_module(singleplayer_grid).
@@ -153,8 +155,7 @@ has_square(Game, BoardID) :-
     Symbol \= '.',
     get_symbol(Game, BoardID, R1, C2, Symbol),
     get_symbol(Game, BoardID, R2, C1, Symbol),
-    get_symbol(Game, BoardID, R2, C2, Symbol),
-    !.  % Cut para evitar backtracking após encontrar o primeiro quadrado.
+    get_symbol(Game, BoardID, R2, C2, Symbol).
 
 % has_losing_condition(+Game, +BoardID)
 % Succeeds se o tabuleiro especificado atender a qualquer condição de perda.
@@ -166,13 +167,13 @@ has_losing_condition(Game, BoardID) :-
 
 % player_loses(+Game)
 % Succeeds se qualquer um dos tabuleiros atender a condições de perda.
-player_loses(Game) :-
+singleplayer_loses(Game) :-
     has_losing_condition(Game, 1);
     has_losing_condition(Game, 2).
 
 % player_wins(+Game)
 % Succeeds se ambos os tabuleiros estiverem completos (sem células vazias).
-player_wins(Game) :-
+all_boards_full(Game) :-
     get_board(Game, 1, board(1, _, _, Cells1)),
     get_board(Game, 2, board(2, _, _, Cells2)),
     \+ member(cell(_, _, '.'), Cells1),
@@ -182,13 +183,56 @@ player_wins(Game) :-
 % game_status(+Game, -Status)
 % Verifica o status do jogo baseado no estado atual.
 % Status pode ser 'ongoing', 'won', 'lost'.
-game_status(Game, Status) :-
+singleplayer_game_over(Game, Status) :-
     (
-        player_loses(Game)
+        singleplayer_loses(Game)
     ->
         Status = lost
-    ;   player_wins(Game)
+    ;   all_boards_full(Game)
     ->
         Status = won
     ;   Status = ongoing
     ).
+
+/*
+    calculate_player_score(+Game,+BoardID, -Score)
+    Calcula a pontuação do jogador com base nas linhas e quadrados formados.
+*/
+calculate_player_score(Game,BoardID, Score) :-
+    % Calcula o número de sequências horizontais
+    findall(1, has_four_horizontal(Game,BoardID), HorizontalScores),
+    % Calcula o número de sequências verticais
+    findall(1, has_four_vertical(Game,BoardID), VerticalScores),
+    % Calcula o número de sequências diagonais
+    findall(1, has_four_diagonal(Game,BoardID), DiagonalScores),
+    % Calcula o número de quadrados 2x2
+    findall(1, has_square(Game,BoardID), SquareScores),
+    % Soma todas as pontuações
+    append([HorizontalScores, VerticalScores, DiagonalScores, SquareScores], AllScores),
+    length(AllScores, Score).
+
+/*
+    update_player_score(+Game, +BoardID,+Player, -UpdatedPlayer)
+    Atualiza a pontuação do jogador com base no novo estado do tabuleiro.
+*/
+update_player_score(Game, player(Name,BoardID, OldScore), player(Name,BoardID, NewScore)) :-
+    calculate_player_score(Game,BoardID, Score),
+    NewScore is OldScore + Score.
+
+/*
+    determine_winner(+Players, -Winner)
+    Determina o jogador com a menor pontuação.
+    Players: Lista de jogadores na forma player(Name,BoardID, Score).
+    Winner: Jogador com a menor pontuação.
+*/
+determine_winner([Player1, Player2], Winner) :-
+    Player1 = player(_, _, Score1),
+    Player2 = player(_, _, Score2),
+    (   Score1 =< Score2
+    ->  Winner = Player1
+    ;   Winner = Player2
+    ).
+
+multiplayer_game_over(Game,Players, Result) :-
+    all_boards_full(Game),
+    determine_winner(Players,Result).

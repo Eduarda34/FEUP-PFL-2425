@@ -2,9 +2,9 @@
 
 T16_G07
 ---
-Maria Eduarda Pacheco Mendes Araújo - up202004473 --> percentagem
+Maria Eduarda Pacheco Mendes Araújo - up202004473 --> 50%
 
-Miguel Ângelo Pacheco Valente - up201704608 --> percentagem
+Miguel Ângelo Pacheco Valente - up201704608 --> 50%
 
 ---
 ## General Description

@@ -70,6 +70,5 @@ prompt_row(Row) :-
     
 
 prompt_col(Col) :-
-    write('Choose the collumn (1-6): '),
+    write('Choose the column (1-6): '),
     read(Col).
-

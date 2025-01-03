@@ -1,11 +1,13 @@
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
 :- module(ai_implementation,
-          [ play_player_vs_computer/1
+          [ play_player_vs_computer/1,
+            valid_move/3
           ]).
 
 :- use_module(library(lists)).
 :- use_module(library(random)).
+:- use_module(grid, [pick_space/6, init_boards/2, get_board/3, print_boards/2]).
 :- use_module(grid).
 :- use_module(singleplayer).
 :- use_module(multiplayer).
@@ -13,7 +15,7 @@
 
 % Entry point for Player vs. Computer mode
 play_player_vs_computer(Level) :-
-    singleplayer_grid:init_boards(2, Game), % Initialize game with 2 boards
+    grid:init_boards(2, Game), % Initialize game with 2 boards
     write('Welcome to Player vs. Computer Mode!'), nl,
     nl,
     game_loop_turn_pvc([player(1, 1, 0), ai(2, 2, Level)], Game).
@@ -28,29 +30,25 @@ game_loop_turn_pvc([player(Name, BoardID, Score) | RemainingPlayers], Game) :-
     write('Choose two empty cells to place O and X.'), nl,
     prompt_two_moves(Row1, Col1, Row2, Col2),
     (
-        Row1 = Row2, Col1 = Col2
+        valid_move(Game, BoardID, Row1, Col1),
+        valid_move(Game, BoardID, Row2, Col2),
+        (Row1 \= Row2 ; Col1 \= Col2)
     ->
-        write('Cannot choose the same cell for both symbols. Try again.'), nl,
-        game_loop_turn_pvc([player(Name, BoardID, Score) | RemainingPlayers], Game)
-    ;
+        pick_space(Row1, Col1, 'O', BoardID, Game, GameAfterO),
+        pick_space(Row2, Col2, 'X', BoardID, GameAfterO, GameAfterX),
+        update_player_score(GameAfterX, player(Name, BoardID, Score), UpdatedPlayer),
         (
-            pick_space(Row1, Col1, 'O', Game, GameAfterO),
-            pick_space(Row2, Col2, 'X', GameAfterO, GameAfterX)
+            multiplayer_game_over(GameAfterX, [UpdatedPlayer | RemainingPlayers], Winner)
         ->
-            update_player_score(GameAfterX, player(Name, BoardID, Score), UpdatedPlayer),
-            (
-                multiplayer_game_over(GameAfterX, [UpdatedPlayer | RemainingPlayers], Winner)
-            ->
-                Winner = player(WinnerName, _, WinnerScore),
-                format('Game ended! Player ~w won with a score of ~w.~n', [WinnerName, WinnerScore])
-            ;
-                append(RemainingPlayers, [UpdatedPlayer], NewPlayerOrder),
-                game_loop_turn_pvc(NewPlayerOrder, GameAfterX)
-            )
+            Winner = player(WinnerName, _, WinnerScore),
+            format('Game ended! Player ~w won with a score of ~w.~n', [WinnerName, WinnerScore])
         ;
-            write('Invalid move. Try again.'), nl,
-            game_loop_turn_pvc([player(Name, BoardID, Score) | RemainingPlayers], Game)
+            append(RemainingPlayers, [UpdatedPlayer], NewPlayerOrder),
+            game_loop_turn_pvc(NewPlayerOrder, GameAfterX)
         )
+    ;
+        write('Invalid move. Try again.'), nl,
+        game_loop_turn_pvc([player(Name, BoardID, Score) | RemainingPlayers], Game)
     ).
 
 % AI Turn
@@ -59,9 +57,12 @@ game_loop_turn_pvc([ai(Name, BoardID, Level) | RemainingPlayers], Game) :-
     format('Computer (Player ~w) is making a move...~n', [Name]),
     choose_move(Game, Level, (Row1, Col1, Row2, Col2)),
     (
-        pick_space(Row1, Col1, 'O', Game, GameAfterO),
-        pick_space(Row2, Col2, 'X', GameAfterO, GameAfterX)
+        valid_move(Game, BoardID, Row1, Col1),
+        valid_move(Game, BoardID, Row2, Col2),
+        (Row1 \= Row2 ; Col1 \= Col2)
     ->
+        pick_space(Row1, Col1, 'O', BoardID, Game, GameAfterO),
+        pick_space(Row2, Col2, 'X', BoardID, GameAfterO, GameAfterX),
         update_player_score(GameAfterX, ai(Name, BoardID, Level), UpdatedAI),
         (
             multiplayer_game_over(GameAfterX, [UpdatedAI | RemainingPlayers], Winner)
@@ -73,7 +74,7 @@ game_loop_turn_pvc([ai(Name, BoardID, Level) | RemainingPlayers], Game) :-
             game_loop_turn_pvc(NewPlayerOrder, GameAfterX)
         )
     ;
-        write('Computer made an invalid move (should not happen). Restarting turn...'), nl,
+        write('Computer chose invalid moves. Restarting turn...'), 
         game_loop_turn_pvc([ai(Name, BoardID, Level) | RemainingPlayers], Game)
     ).
 
@@ -82,29 +83,38 @@ game_loop_turn_pvc([ai(Name, BoardID, Level) | RemainingPlayers], Game) :-
     Determines the computer's move based on the difficulty level.
 */
 choose_move(Game, Level, (Row1, Col1, Row2, Col2)) :-
-    Level = 1,
-    findall((Row, Col), valid_move(Game, Row, Col), ValidMoves),
+    Level = 1, % Random valid moves
+    findall((Row, Col), valid_move(Game, 2, Row, Col), ValidMoves), % Use BoardID = 2 for AI
+    format('Valid moves for AI: ~w~n', [ValidMoves]),
     random_permutation(ValidMoves, ShuffledMoves),
-    % Ensure there are at least two distinct valid moves
-    ShuffledMoves = [(Row1, Col1) | Rest],
-    Rest = [(Row2, Col2) | _].
+    select_two_distinct_moves(ShuffledMoves, (Row1, Col1), (Row2, Col2)),
+    format('AI chose moves: (~w, ~w) and (~w, ~w)~n', [Row1, Col1, Row2, Col2]).
 
 choose_move(Game, Level, (Row1, Col1, Row2, Col2)) :-
-    Level = 2,
+    Level = 2, % Greedy algorithm
     findall((Row, Col, Value), (
-        valid_move(Game, Row, Col),
+        valid_move(Game, 2, Row, Col), % Use BoardID = 2 for AI
         evaluate_move(Game, Row, Col, Value)
     ), ScoredMoves),
-    % Ensure there are at least two distinct moves with scores
     sort(3, @>=, ScoredMoves, [(Row1, Col1, _), (Row2, Col2, _)|_]).
+
+/* select_two_distinct_moves(+ValidMoves, -Move1, -Move2)
+   Ensures two distinct moves are selected from the list of valid moves.
+*/
+select_two_distinct_moves([Move1 | Rest], Move1, Move2) :-
+    member(Move2, Rest). % Ensure Move2 is distinct from Move1.
 
 /*
     valid_move(+Game, -Row, -Col)
     Ensures the given row and column correspond to an empty cell.
 */
-valid_move(Game, Row, Col) :-
-    singleplayer_grid:get_board(Game, 2, Board), % AI plays on board 2
-    valid_cell(Board, Row, Col).
+valid_move(Game, BoardID, Row, Col) :-
+    get_board(Game, BoardID, Board),
+    board_is_empty(Board, Row, Col).
+
+% Helper: Checks if a specific cell in a board is empty.
+board_is_empty(board(_, _, _, Cells), Row, Col) :-
+    member(cell(Row, Col, '.'), Cells).
 
 /*
     evaluate_move(+Game, +Row, +Col, -Value)

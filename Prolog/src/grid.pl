@@ -1,10 +1,10 @@
 /* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
-:- module(singleplayer_grid,
+:- module(grid,
           [ init_boards/1,
             init_boards/2,
             init_boards/3,
-            pick_space/5,
+            pick_space/6,
             print_boards/1,
             get_board/3,
             get_symbol/5,
@@ -132,10 +132,15 @@ valid_symbol('.').
    pick_space(+RowLabel, +ColLabel, +Symbol, +State, -NewState)
    Places the Symbol at the specified Row and Col across all boards in the game state.
 */
-pick_space(RowLabel, ColLabel, Symbol, Game, NewGame) :-
-    valid_symbol(Symbol),
-    functor(Game, game, NumBoards),
-    place_symbol_on_all_boards(Game, NumBoards, RowLabel, ColLabel, Symbol, NewGame).
+pick_space(Row, Col, Symbol, BoardID, game(Board1, Board2), game(NewBoard1, Board2)) :-
+    BoardID =:= 1, % Update Board 1
+    update_board(Board1, Row, Col, Symbol, NewBoard1),
+    Board1 \= NewBoard1. % Ensure the board actually changed.
+
+pick_space(Row, Col, Symbol, BoardID, game(Board1, Board2), game(Board1, NewBoard2)) :-
+    BoardID =:= 2, % Update Board 2
+    update_board(Board2, Row, Col, Symbol, NewBoard2),
+    Board2 \= NewBoard2. % Ensure the board actually changed.
 
 /*
    place_symbol_on_all_boards(+Game, +NumBoards, +Row, +Col, +Symbol, -NewGame)

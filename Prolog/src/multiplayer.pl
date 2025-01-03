@@ -1,5 +1,9 @@
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
+:- module(multiplayer,
+          [ prompt_two_moves/4
+          ]).
+
 :- use_module(library(lists)).
 :- use_module(grid).
 :- use_module(singleplayer_normal_difficulty).

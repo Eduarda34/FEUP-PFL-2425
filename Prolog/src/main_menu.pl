@@ -2,64 +2,79 @@
 
 :- use_module(singleplayer).
 :- use_module(multiplayer).
+:- use_module(ai_implementation).
 
 c :- consult('/home/miguelvalente/Documents/Faculdade/FEUP-PFL-2425/Prolog/src/main_menu.pl').
 
 % Main Menu
 main_menu :-
     write('==== MENU ===='), nl,
-    write('1. Start Game'), nl,
-    write('2. Instructions'), nl,
-    write('3. Exit'), nl,
+    write('1. Singleplayer'), nl,  % Updated to display a submenu
+    write('2. Multiplayer'), nl,
+    write('3. Instructions'), nl,
+    write('4. Exit'), nl,
     write('Choose an option: '),
-    read(Option),  % Capture input
+    read(Option),
     handle_option(Option).
 
-% Main Menu - Número de jogadores
-handle_option(1) :-
-    write('Choose the number of players:'), nl,
-    write('1. 1 Player'), nl,
-    write('2. 2 Players'), nl,
-    write('3. 3 Players'), nl,
-    read(Choice),  % Capture input
-    handle_players(Choice),
-    main_menu.
-
-% Main Menu - Instruções
-handle_option(2) :-
-    write('==== INSTRUCTIONS ===='), nl,
-    write('--> Take turns placing symbols (X or O) on the grid.'), nl,
-    write('--> The first player to form four consecutive symbols in a row, column, or diagonal wins.'), nl,
-    write('--> Ensure no invalid moves are made.'), nl,
-    write('Press any key to return to the menu.'), nl,
-    get_char(_),  % Wait for keypress
-    get_char(_),
-    main_menu.
-
-% Main Menu - Sair do jogo
-handle_option(3) :-
-    write('Exiting the game...'), nl.
-
-% Main Menu - Opção inválida
+% Handle top-level menu options
+handle_option(1) :- singleplayer_menu.
+handle_option(2) :- multiplayer_menu.
+handle_option(3) :- display_instructions.
+handle_option(4) :- write('Exiting the game...'), nl.
 handle_option(_) :-
     write('Invalid option, try again.'), nl,
     main_menu.
 
-% Número de jogadores - 1 jogador
-handle_players(1) :-
-    write('Starting 1-player mode.'), nl,
+% Singleplayer Menu
+singleplayer_menu :-
+    write('==== SINGLEPLAYER ===='), nl,
+    write('1. Classic Singleplayer'), nl,
+    write('2. Player vs Computer'), nl,
+    write('Choose an option: '),
+    read(Choice),
+    handle_singleplayer_choice(Choice).
+
+handle_singleplayer_choice(1) :- % Classic singleplayer
     play_singleplayer.
 
-% Número de jogadores - 2 jogadores
-handle_players(2) :-
-    write('Starting 2-player mode.'), nl,
+handle_singleplayer_choice(2) :- % Player vs Computer
+    write('Choose difficulty level for the computer:'), nl,
+    write('1. Easy'), nl,
+    write('2. Hard'), nl,
+    read(Level),
+    play_player_vs_computer(Level).
+
+handle_singleplayer_choice(_) :-
+    write('Invalid option, returning to the main menu.'), nl,
+    main_menu.
+
+% Multiplayer Menu
+multiplayer_menu :-
+    write('==== MULTIPLAYER ===='), nl,
+    write('1. 2 Players'), nl,
+    write('2. 3 Players'), nl,
+    write('Choose an option: '),
+    read(Choice),
+    handle_multiplayer_choice(Choice).
+
+handle_multiplayer_choice(1) :- % 2-player mode
     play_multiplayer.
 
-% Número de jogadores - 3 jogadores
-handle_players(3) :-
-    write('Starting 3-player mode.'), nl,
+handle_multiplayer_choice(2) :- % 3-player mode
     play_three_player.
 
-% Fallback for invalid player count
-handle_players(_) :-
-    write('Invalid player choice, returning to menu.'), nl.
+handle_multiplayer_choice(_) :-
+    write('Invalid option, returning to the main menu.'), nl,
+    main_menu.
+
+% Display instructions
+display_instructions :-
+    write('==== INSTRUCTIONS ===='), nl,
+    write('--> Singleplayer Classic: Play against yourself by alternating turns.'), nl,
+    write('--> Player vs Computer: Compete against the computer with different difficulty levels.'), nl,
+    write('--> Multiplayer: Play against other players (2 or 3 players).'), nl,
+    write('Press any key to return to the main menu.'), nl,
+    get_char(_),
+    get_char(_),
+    main_menu.

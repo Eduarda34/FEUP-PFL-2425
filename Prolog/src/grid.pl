@@ -1,7 +1,8 @@
 /* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
 :- module(singleplayer_grid,
-          [ init_boards/2,
+          [ init_boards/1,
+            init_boards/2,
             init_boards/3,
             pick_space/5,
             print_boards/1,
@@ -33,6 +34,8 @@
    Cells é uma lista de cell(Row, Col, Symbol).
 */
 
+singleplayer_rows([a,b,c,d,e,f]).
+singleplayer_cols([1,2,3,4,5,6]).
 default_rows([a,b,c,d,e,f,g,h]).
 default_cols([1,2,3,4,5,6,7,8]).
 
@@ -56,6 +59,18 @@ get_symbol(Game, BoardID, Row, Col, Symbol) :-
 
 %% init_boards(-State)
 %% Initializes the game state with either two or three boards.
+init_boards(game(Board1, Board2)) :-
+    singleplayer_rows(AllRows),
+    singleplayer_cols(AllCols),
+    random_shuffled_list(AllRows, ShuffledRows1),
+    random_shuffled_list(AllCols, ShuffledCols1),
+    initialize_cells(ShuffledRows1, ShuffledCols1, Cells1),
+    Board1 = board(1, ShuffledRows1, ShuffledCols1, Cells1),
+    random_shuffled_list(AllRows, ShuffledRows2),
+    random_shuffled_list(AllCols, ShuffledCols2),
+    initialize_cells(ShuffledRows2, ShuffledCols2, Cells2),
+    Board2 = board(2, ShuffledRows2, ShuffledCols2, Cells2).
+
 init_boards(2, game(Board1, Board2)) :- % For 2-player mode
     default_rows(AllRows),
     default_cols(AllCols),

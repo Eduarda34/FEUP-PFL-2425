@@ -5,7 +5,7 @@
           [ play_singleplayer/0
           ]).
 
-:- use_module(singleplayer_grid).
+:- use_module(grid).
 :- use_module(singleplayer_normal_difficulty).
 
 /* 
@@ -24,33 +24,32 @@ play_singleplayer :-
     game_loop(+GameState, +CurrentSymbol)
 */
 game_loop(Game, Symbol) :-
-    print_boards(Game),
+    print_boards(Game, true),  % Dynamically print all boards
     format('~w Turn.~n', [Symbol]),
     prompt_move(Row, Col),
     (
-        % Tentar fazer a jogada.
-        % pick_space(+Row, +Col, +Symbol, +Game, -NewGame)
+        % Attempt to make the move
         pick_space(Row, Col, Symbol, Game, NewGame)
     ->
         (
-            % Verificar o status do jogo após a jogada.
+            % Check game status after the move
             singleplayer_game_over(NewGame, Status),
             (
                 Status = won
             ->
-                print_boards(NewGame),
+                print_boards(NewGame, true),
                 write('Congratulations! You won the game.'), nl
             ;   Status = lost
             ->
-                print_boards(NewGame),
+                print_boards(NewGame, true),
                 format('You lost the game due to a losing condition with the symbol ~w.~n', [Symbol]), nl
-            ;   % Caso o jogo continue, alternar o símbolo e continuar o loop.
+            ;   % If the game continues, alternate the symbol and keep playing
                 next_symbol(Symbol, NextSymbol),
                 game_loop(NewGame, NextSymbol)
             )
         )
     ;
-        % Se a jogada for inválida, informar e reiniciar o loop com o mesmo símbolo.
+        % If the move is invalid, notify and restart the loop with the same symbol
         write('Invalid move. Try again.'), nl,
         game_loop(Game, Symbol)
     ).

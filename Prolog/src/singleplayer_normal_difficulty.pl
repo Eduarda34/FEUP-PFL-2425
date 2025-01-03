@@ -7,7 +7,7 @@
             multiplayer_game_over/3
           ]).
 
-:- use_module(singleplayer_grid).
+:- use_module(grid).
 :- use_module(library(between)).
 :- use_module(library(lists)).
 

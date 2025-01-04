@@ -3,6 +3,7 @@
 :- use_module(singleplayer).
 :- use_module(multiplayer).
 :- use_module(ai_implementation).
+:- use_module(computer_vs_computer).
 
 c :- consult('/home/miguelvalente/Documents/Faculdade/FEUP-PFL-2425/Prolog/src/main_menu.pl').
 
@@ -31,6 +32,7 @@ singleplayer_menu :-
     write('==== SINGLEPLAYER ===='), nl,
     write('1. Classic Singleplayer'), nl,
     write('2. Player vs Computer'), nl,
+    write('3. Computer vs Computer'), nl,
     write('Choose an option: '),
     read(Choice),
     handle_singleplayer_choice(Choice).
@@ -44,6 +46,14 @@ handle_singleplayer_choice(2) :- % Player vs Computer
     write('2. Medium'), nl,
     read(Level),
     play_player_vs_computer(Level).
+
+handle_singleplayer_choice(3) :-
+    write('Choose difficulty level for the computers:'), nl,
+    write('1. Easy'), nl,
+    write('2. Medium'), nl,
+    write('3. Hard'), nl,
+    read(Level),
+    play_computer_vs_computer(Level).
 
 handle_singleplayer_choice(_) :-
     write('Invalid option, returning to the main menu.'), nl,

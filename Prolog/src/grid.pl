@@ -1,7 +1,9 @@
 /* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
 :- module(grid,
-          [ init_boards/1,
+          [ default_cols/1,
+            default_rows/1,
+            init_boards/1,
             init_boards/2,
             init_boards/3,
             pick_space/5,

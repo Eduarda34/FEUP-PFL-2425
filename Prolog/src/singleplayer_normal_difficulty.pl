@@ -242,6 +242,17 @@ determine_winner([Player1, Player2], Winner) :-
     ->  Winner = Player1
     ;   Winner = Player2).
 
-multiplayer_game_over(Game, Players, Result) :-
+calculate_scores(Game, Players, ScoredPlayers) :-
+    findall(
+        player(Name, BoardID, Score),
+        (
+            member(player(Name, BoardID, _), Players),
+            calculate_player_score(Game, BoardID, Score)
+        ),
+        ScoredPlayers
+    ).
+
+multiplayer_game_over(Game, Players, Winner) :-
     all_boards_full(Game),
-    determine_winner(Players, Result).
+    calculate_scores(Game, Players, ScoredPlayers),
+    determine_winner(ScoredPlayers, Winner).

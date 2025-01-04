@@ -37,7 +37,6 @@ player_vs_computer_loop(GameState, 'computer', Level) :- % Computer's turn
     print_boards(GameState, true),
     write('Computer\'s turn!'), nl,
     find_valid_moves(GameState, ValidMoves),
-    format('Valid moves available: ~w~n', [ValidMoves]), % Debugging output
     (   length(ValidMoves, L), L >= 2
     ->  random_select(cell(Row1, Col1, '.'), ValidMoves, TempMoves),
         random_select(cell(Row2, Col2, '.'), TempMoves, _),

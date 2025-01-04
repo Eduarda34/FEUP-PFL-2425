@@ -27,7 +27,7 @@ play_three_player :-
     Processes a turn for the current player and moves to the next.
 */
 game_loop_turn([CurrentPlayer | RemainingPlayers], Game) :-
-    CurrentPlayer = player(Name, BoardID, Score),
+    CurrentPlayer = player(Name, _BoardID, _Score),
     print_boards(Game, true),  % Dynamically print all boards
     format('Player ~w\'s turn.~n', [Name]),
     write('Choose two empty cells to place O and X.'), nl,

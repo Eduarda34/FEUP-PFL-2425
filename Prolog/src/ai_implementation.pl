@@ -1,129 +1,124 @@
-/* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
-
-:- module(ai_implementation,
+:- module(player_vs_computer,
           [ play_player_vs_computer/1,
-            valid_move/3
+            choose_move/3
           ]).
 
-:- use_module(library(lists)).
-:- use_module(library(random)).
-:- use_module(grid, [pick_space/6, init_boards/2, get_board/3, print_boards/2]).
 :- use_module(grid).
-:- use_module(singleplayer).
-:- use_module(multiplayer).
 :- use_module(singleplayer_normal_difficulty).
+:- use_module(library(random)).
 
-% Entry point for Player vs. Computer mode
+% Entry point for the Player vs Computer game
 play_player_vs_computer(Level) :-
-    grid:init_boards(2, Game), % Initialize game with 2 boards
-    write('Welcome to Player vs. Computer Mode!'), nl,
-    nl,
-    game_loop_turn_pvc([player(1, 1, 0), ai(2, 2, Level)], Game).
+    init_boards(2, GameState), % Initialize the game state
+    write('Starting Player vs Computer Game!'), nl,
+    write('You are X and O, and the computer is X and O.'), nl,
+    player_vs_computer_loop(GameState, 'player', Level).
 
-/*
-    game_loop_turn_pvc(+Players, +Game)
-    Processes a turn for the current player and alternates turns.
-*/
-game_loop_turn_pvc([player(Name, BoardID, Score) | RemainingPlayers], Game) :-
-    print_boards(Game, true),
-    format('Player ~w\'s turn.~n', [Name]),
-    write('Choose two empty cells to place O and X.'), nl,
+% Main loop for alternating turns between the player and the computer
+player_vs_computer_loop(GameState, 'player', Level) :- % Player's turn
+    print_boards(GameState, true),
+    write('Your turn!'), nl,
     prompt_two_moves(Row1, Col1, Row2, Col2),
     (
-        valid_move(Game, BoardID, Row1, Col1),
-        valid_move(Game, BoardID, Row2, Col2),
-        (Row1 \= Row2 ; Col1 \= Col2)
+        pick_space(Row1, Col1, 'X', 1, GameState, TempGameState1),
+        pick_space(Row1, Col1, 'X', 2, TempGameState1, TempGameState2),
+        pick_space(Row2, Col2, 'O', 1, TempGameState2, TempGameState3),
+        pick_space(Row2, Col2, 'O', 2, TempGameState3, NewGameState)
     ->
-        pick_space(Row1, Col1, 'O', BoardID, Game, GameAfterO),
-        pick_space(Row2, Col2, 'X', BoardID, GameAfterO, GameAfterX),
-        update_player_score(GameAfterX, player(Name, BoardID, Score), UpdatedPlayer),
-        (
-            multiplayer_game_over(GameAfterX, [UpdatedPlayer | RemainingPlayers], Winner)
-        ->
-            Winner = player(WinnerName, _, WinnerScore),
-            format('Game ended! Player ~w won with a score of ~w.~n', [WinnerName, WinnerScore])
-        ;
-            append(RemainingPlayers, [UpdatedPlayer], NewPlayerOrder),
-            game_loop_turn_pvc(NewPlayerOrder, GameAfterX)
-        )
+        check_game_status(NewGameState, 'player', Level)
     ;
-        write('Invalid move. Try again.'), nl,
-        game_loop_turn_pvc([player(Name, BoardID, Score) | RemainingPlayers], Game)
+        write('Invalid moves. Try again.'), nl,
+        player_vs_computer_loop(GameState, 'player', Level)
     ).
 
-% AI Turn
-game_loop_turn_pvc([ai(Name, BoardID, Level) | RemainingPlayers], Game) :-
-    print_boards(Game, true),
-    format('Computer (Player ~w) is making a move...~n', [Name]),
-    choose_move(Game, Level, (Row1, Col1, Row2, Col2)),
+player_vs_computer_loop(GameState, 'computer', Level) :- % Computer's turn
+    print_boards(GameState, true),
+    write('Computer\'s turn!'), nl,
+    find_valid_moves(GameState, ValidMoves),
+    format('Valid moves available: ~w~n', [ValidMoves]), % Debugging output
+    (   length(ValidMoves, L), L >= 2
+    ->  random_select(cell(Row1, Col1, '.'), ValidMoves, TempMoves),
+        random_select(cell(Row2, Col2, '.'), TempMoves, _),
+        format('Computer chose: (~w, ~w) and (~w, ~w)~n', [Row1, Col1, Row2, Col2]),
+        pick_space(Row1, Col1, 'X', 1, GameState, TempGameState1),
+        pick_space(Row1, Col1, 'X', 2, TempGameState1, TempGameState2),
+        pick_space(Row2, Col2, 'O', 1, TempGameState2, TempGameState3),
+        pick_space(Row2, Col2, 'O', 2, TempGameState3, NewGameState),
+        check_game_status(NewGameState, 'computer', Level)
+    ;   (length(ValidMoves, L), L == 0
+        -> write('No valid moves left. Game over!'), nl,
+           print_boards(GameState, true),
+           write('It\'s a draw!'), nl
+        ; write('Computer cannot make a valid move.'), nl,
+          player_vs_computer_loop(GameState, 'computer', Level))
+    ).
+
+% Checks the game state after a move and continues or ends the game
+check_game_status(GameState, CurrentPlayer, Level) :-
+    singleplayer_game_over(GameState, Status),
     (
-        valid_move(Game, BoardID, Row1, Col1),
-        valid_move(Game, BoardID, Row2, Col2),
-        (Row1 \= Row2 ; Col1 \= Col2)
+        Status = won
     ->
-        pick_space(Row1, Col1, 'O', BoardID, Game, GameAfterO),
-        pick_space(Row2, Col2, 'X', BoardID, GameAfterO, GameAfterX),
-        update_player_score(GameAfterX, ai(Name, BoardID, Level), UpdatedAI),
-        (
-            multiplayer_game_over(GameAfterX, [UpdatedAI | RemainingPlayers], Winner)
-        ->
-            Winner = ai(WinnerName, _, WinnerScore),
-            format('Game ended! Computer (Player ~w) won with a score of ~w.~n', [WinnerName, WinnerScore])
-        ;
-            append(RemainingPlayers, [UpdatedAI], NewPlayerOrder),
-            game_loop_turn_pvc(NewPlayerOrder, GameAfterX)
-        )
-    ;
-        write('Computer chose invalid moves. Restarting turn...'), 
-        game_loop_turn_pvc([ai(Name, BoardID, Level) | RemainingPlayers], Game)
+        print_boards(GameState, true),
+        format('Game over! ~w wins!~n', [CurrentPlayer])
+    ;   Status = lost
+    ->
+        print_boards(GameState, true),
+        format('Game over! ~w loses!~n', [CurrentPlayer])
+    ;   % Continue the game, alternate turns
+        (CurrentPlayer = 'player' -> NextPlayer = 'computer'; NextPlayer = 'player'),
+        player_vs_computer_loop(GameState, NextPlayer, Level)
     ).
 
-/*
-    choose_move(+GameState, +Level, -Move)
-    Determines the computer's move based on the difficulty level.
-*/
-choose_move(Game, Level, (Row1, Col1, Row2, Col2)) :-
-    Level = 1, % Random valid moves
-    findall((Row, Col), valid_move(Game, 2, Row, Col), ValidMoves), % Use BoardID = 2 for AI
-    format('Valid moves for AI: ~w~n', [ValidMoves]),
-    random_permutation(ValidMoves, ShuffledMoves),
-    select_two_distinct_moves(ShuffledMoves, (Row1, Col1), (Row2, Col2)),
-    format('AI chose moves: (~w, ~w) and (~w, ~w)~n', [Row1, Col1, Row2, Col2]).
+% choose_move(+GameState, +Level, -Move)
+choose_move(GameState, 1, Move) :- % Level 1: Random valid move
+    find_valid_moves(GameState, ValidMoves),
+    random_select(cell(Row, Col, '.'), ValidMoves, _),
+    Move = (Row, Col).
 
-choose_move(Game, Level, (Row1, Col1, Row2, Col2)) :-
-    Level = 2, % Greedy algorithm
-    findall((Row, Col, Value), (
-        valid_move(Game, 2, Row, Col), % Use BoardID = 2 for AI
-        evaluate_move(Game, Row, Col, Value)
-    ), ScoredMoves),
-    sort(3, @>=, ScoredMoves, [(Row1, Col1, _), (Row2, Col2, _)|_]).
+choose_move(GameState, 2, Move) :- % Level 2: Greedy best move
+    findall(
+        (Score, Row, Col),
+        (valid_cell(GameState, Row, Col), simulate_move(GameState, Row, Col, Score)),
+        ScoredMoves
+    ),
+    sort(1, @>=, ScoredMoves, [(BestScore, Row, Col) | _]),
+    format('Chose move with score ~w: (~w, ~w)~n', [BestScore, Row, Col]),
+    Move = (Row, Col).
 
-/* select_two_distinct_moves(+ValidMoves, -Move1, -Move2)
-   Ensures two distinct moves are selected from the list of valid moves.
-*/
-select_two_distinct_moves([Move1 | Rest], Move1, Move2) :-
-    member(Move2, Rest). % Ensure Move2 is distinct from Move1.
+% Finds all valid moves
+find_valid_moves(GameState, ValidMoves) :-
+    findall(cell(Row, Col, '.'), (
+        valid_row_col(Row, Col),
+        get_symbol(GameState, 1, Row, Col, '.'),
+        get_symbol(GameState, 2, Row, Col, '.')), ValidMoves).
 
-/*
-    valid_move(+Game, -Row, -Col)
-    Ensures the given row and column correspond to an empty cell.
-*/
-valid_move(Game, BoardID, Row, Col) :-
-    get_board(Game, BoardID, Board),
-    board_is_empty(Board, Row, Col).
+% Ensures the row and column are within valid bounds
+valid_row_col(Row, Col) :-
+    member(Row, [a, b, c, d, e, f, g, h]),
+    member(Col, [1, 2, 3, 4, 5, 6, 7, 8]).
 
-% Helper: Checks if a specific cell in a board is empty.
-board_is_empty(board(_, _, _, Cells), Row, Col) :-
-    member(cell(Row, Col, '.'), Cells).
+% Simulates a move and calculates the score for Level 2
+simulate_move(GameState, Row, Col, Score) :-
+    pick_space(Row, Col, 'X', 1, GameState, NewGameState),
+    calculate_player_score(NewGameState, 1, Score).
 
-/*
-    evaluate_move(+Game, +Row, +Col, -Value)
-    Evaluates the potential value of a move based on the game state.
-*/
-evaluate_move(Game, Row, Col, Value) :-
-    simulate_move(Game, Row, Col, TempGame),
-    value(TempGame, 2, Value). % Use value/3 predicate to evaluate the state.
+% Prompts the player for two moves
+prompt_two_moves(Row1, Col1, Row2, Col2) :-
+    write('First move (X):'), nl,
+    prompt_move(Row1, Col1),
+    write('Second move (O):'), nl,
+    prompt_move(Row2, Col2).
 
-% Simulate placing a symbol
-simulate_move(Game, Row, Col, NewGame) :-
-    pick_space(Row, Col, 'O', Game, NewGame).
+% Prompts the player for a row and column
+prompt_move(Row, Col) :-
+    prompt_row(Row),
+    prompt_col(Col).
+
+prompt_row(Row) :-
+    write('Choose the row (a-h): '),
+    read(Row).
+
+prompt_col(Col) :-
+    write('Choose the column (1-8): '),
+    read(Col).

@@ -133,14 +133,13 @@ valid_symbol('.').
    Places the Symbol at the specified Row and Col across all boards in the game state.
 */
 pick_space(Row, Col, Symbol, BoardID, game(Board1, Board2), game(NewBoard1, Board2)) :-
-    BoardID =:= 1, % Update Board 1
+    BoardID =:= 1,
     update_board(Board1, Row, Col, Symbol, NewBoard1),
-    Board1 \= NewBoard1. % Ensure the board actually changed.
-
+    !. % Ensure the board update succeeds before proceeding
 pick_space(Row, Col, Symbol, BoardID, game(Board1, Board2), game(Board1, NewBoard2)) :-
-    BoardID =:= 2, % Update Board 2
+    BoardID =:= 2,
     update_board(Board2, Row, Col, Symbol, NewBoard2),
-    Board2 \= NewBoard2. % Ensure the board actually changed.
+    !. % Ensure the board update succeeds before proceeding
 
 /*
    place_symbol_on_all_boards(+Game, +NumBoards, +Row, +Col, +Symbol, -NewGame)

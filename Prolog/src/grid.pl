@@ -4,6 +4,7 @@
           [ init_boards/1,
             init_boards/2,
             init_boards/3,
+            pick_space/5,
             pick_space/6,
             print_boards/1,
             get_board/3,
@@ -132,6 +133,17 @@ valid_symbol('.').
    pick_space(+RowLabel, +ColLabel, +Symbol, +State, -NewState)
    Places the Symbol at the specified Row and Col across all boards in the game state.
 */
+pick_space(RowLabel, ColLabel, Symbol, game(Board1, Board2), game(NewBoard1, NewBoard2)) :-
+    valid_symbol(Symbol),
+    % Verifica se a célula é válida e está vazia no Tabuleiro #1
+    (   valid_cell(Board1, RowLabel, ColLabel)
+    ->  % Atualiza Tabuleiro #1
+        update_board(Board1, RowLabel, ColLabel, Symbol, NewBoard1),
+        % Atualiza Tabuleiro #2
+        update_board(Board2, RowLabel, ColLabel, Symbol, NewBoard2)
+    ;   % Se a célula não for válida ou já estiver ocupada
+        fail
+    ).
 pick_space(Row, Col, Symbol, BoardID, game(Board1, Board2), game(NewBoard1, Board2)) :-
     BoardID =:= 1,
     update_board(Board1, Row, Col, Symbol, NewBoard1),

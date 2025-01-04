@@ -1,7 +1,10 @@
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
 :- module(multiplayer,
-          [ prompt_two_moves/4
+          [ 
+            play_multiplayer/0,
+            play_three_player/0,
+            prompt_two_moves/4
           ]).
 
 :- use_module(library(lists)).

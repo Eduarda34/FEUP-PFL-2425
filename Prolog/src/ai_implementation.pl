@@ -1,4 +1,4 @@
-:- module(player_vs_computer,
+:- module(ai_implementation,
           [ play_player_vs_computer/1,
             choose_move/3
           ]).
@@ -20,6 +20,8 @@ player_vs_computer_loop(GameState, 'player', Level) :- % Player's turn
     write('Your turn!'), nl,
     prompt_two_moves(Row1, Col1, Row2, Col2),
     (
+        valid_move(GameState, Row1, Col1),
+        valid_move(GameState, Row2, Col2),
         pick_space(Row1, Col1, 'X', 1, GameState, TempGameState1),
         pick_space(Row1, Col1, 'X', 2, TempGameState1, TempGameState2),
         pick_space(Row2, Col2, 'O', 1, TempGameState2, TempGameState3),
@@ -27,7 +29,7 @@ player_vs_computer_loop(GameState, 'player', Level) :- % Player's turn
     ->
         check_game_status(NewGameState, 'player', Level)
     ;
-        write('Invalid moves. Try again.'), nl,
+        write('Invalid moves or coordinates already filled. Try again.'), nl,
         player_vs_computer_loop(GameState, 'player', Level)
     ).
 
@@ -55,20 +57,28 @@ player_vs_computer_loop(GameState, 'computer', Level) :- % Computer's turn
 
 % Checks the game state after a move and continues or ends the game
 check_game_status(GameState, CurrentPlayer, Level) :-
-    singleplayer_game_over(GameState, Status),
+    (   multiplayer_game_over(GameState, [player('Player 1', 1, 0), player('Player 2', 2, 0)], Winner)
+    ->  Winner = player(Name, _, Score),
+        print_boards(GameState, true),
+        format('Game over! ~w wins with the fewest lines and squares, score: ~w!~n', [Name, Score])
+    ;   (\+ all_boards_full(GameState)
+        ->  (CurrentPlayer = 'player' -> NextPlayer = 'computer'; NextPlayer = 'player'),
+            player_vs_computer_loop(GameState, NextPlayer, Level)
+        ;   write('Game ended in a draw!'), nl)
+    ).
+/*
+check_game_status(GameState, CurrentPlayer, Level) :-
+    multiplayer_game_over(GameState, [player(player1, 1, 0), player(player2, 2, 0)], Winner),
     (
-        Status = won
+        Winner = player(Name, _, Score)
     ->
         print_boards(GameState, true),
-        format('Game over! ~w wins!~n', [CurrentPlayer])
-    ;   Status = lost
-    ->
-        print_boards(GameState, true),
-        format('Game over! ~w loses!~n', [CurrentPlayer])
+        format('Game over! ~w wins with the fewest lines and squares, score: ~w!~n', [Name, Score])
     ;   % Continue the game, alternate turns
         (CurrentPlayer = 'player' -> NextPlayer = 'computer'; NextPlayer = 'player'),
         player_vs_computer_loop(GameState, NextPlayer, Level)
     ).
+*/
 
 % choose_move(+GameState, +Level, -Move)
 choose_move(GameState, 1, Move) :- % Level 1: Random valid move
@@ -92,6 +102,10 @@ find_valid_moves(GameState, ValidMoves) :-
         valid_row_col(Row, Col),
         get_symbol(GameState, 1, Row, Col, '.'),
         get_symbol(GameState, 2, Row, Col, '.')), ValidMoves).
+
+valid_move(GameState, Row, Col) :-
+    get_symbol(GameState, 1, Row, Col, '.'),
+    get_symbol(GameState, 2, Row, Col, '.').
 
 % Ensures the row and column are within valid bounds
 valid_row_col(Row, Col) :-

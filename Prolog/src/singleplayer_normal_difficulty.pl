@@ -4,7 +4,8 @@
           [ valid_cell/3,
             singleplayer_game_over/2,
             update_player_score/3,
-            multiplayer_game_over/3
+            multiplayer_game_over/3,
+            all_boards_full/1
           ]).
 
 :- use_module(grid).
@@ -198,17 +199,24 @@ singleplayer_game_over(Game, Status) :-
     calculate_player_score(+Game,+BoardID, -Score)
     Calcula a pontuação do jogador com base nas linhas e quadrados formados.
 */
-calculate_player_score(Game,BoardID, Score) :-
-    % Calcula o número de sequências horizontais
-    findall(1, has_four_horizontal(Game,BoardID), HorizontalScores),
-    % Calcula o número de sequências verticais
-    findall(1, has_four_vertical(Game,BoardID), VerticalScores),
-    % Calcula o número de sequências diagonais
-    findall(1, has_four_diagonal(Game,BoardID), DiagonalScores),
-    % Calcula o número de quadrados 2x2
-    findall(1, has_square(Game,BoardID), SquareScores),
-    % Soma todas as pontuações
+calculate_player_score(Game, BoardID, Score) :-
+    % Calculate the number of horizontal lines
+    findall(1, has_four_horizontal(Game, BoardID), HorizontalScores),
+    % Calculate the number of vertical lines
+    findall(1, has_four_vertical(Game, BoardID), VerticalScores),
+    % Calculate the number of diagonal lines
+    findall(1, has_four_diagonal(Game, BoardID), DiagonalScores),
+    % Calculate the number of 2x2 squares
+    findall(1, has_square(Game, BoardID), SquareScores),
+    % Sum all scores
     append([HorizontalScores, VerticalScores, DiagonalScores, SquareScores], AllScores),
+    % Debug individual scores
+    length(HorizontalScores, HCount),
+    length(VerticalScores, VCount),
+    length(DiagonalScores, DCount),
+    length(SquareScores, SCount),
+    format('Horizontal: ~w, Vertical: ~w, Diagonal: ~w, Squares: ~w~n', [HCount, VCount, DCount, SCount]),
+    % Total score
     length(AllScores, Score).
 
 /*
@@ -226,13 +234,14 @@ update_player_score(Game, player(Name,BoardID, OldScore), player(Name,BoardID, N
     Winner: Jogador com a menor pontuação.
 */
 determine_winner([Player1, Player2], Winner) :-
-    Player1 = player(_, _, Score1),
-    Player2 = player(_, _, Score2),
+    Player1 = player(Name1, _, Score1),
+    Player2 = player(Name2, _, Score2),
+    format('Player 1: ~w with score ~w~n', [Name1, Score1]),
+    format('Player 2: ~w with score ~w~n', [Name2, Score2]),
     (   Score1 =< Score2
     ->  Winner = Player1
-    ;   Winner = Player2
-    ).
+    ;   Winner = Player2).
 
-multiplayer_game_over(Game,Players, Result) :-
+multiplayer_game_over(Game, Players, Result) :-
     all_boards_full(Game),
-    determine_winner(Players,Result).
+    determine_winner(Players, Result).

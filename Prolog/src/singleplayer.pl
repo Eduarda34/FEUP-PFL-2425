@@ -18,7 +18,6 @@ play_singleplayer :-
     nl,
     game_loop(Game, 'X').
 
-
 /* 
     Loop principal do jogo.
     game_loop(+GameState, +CurrentSymbol)
@@ -54,10 +53,8 @@ game_loop(Game, Symbol) :-
         game_loop(Game, Symbol)
     ).
 
-
 next_symbol('X', 'O').
 next_symbol('O', 'X').
-
 
 prompt_move(Row, Col) :-
     prompt_row(Row),
@@ -66,7 +63,6 @@ prompt_move(Row, Col) :-
 prompt_row(Row) :-
     write('Choose the row (a-f): '),
     read(Row).
-    
 
 prompt_col(Col) :-
     write('Choose the column (1-6): '),

@@ -9,6 +9,7 @@
 
 :- use_module(library(lists)).
 :- use_module(grid).
+:- use_module(input_helpers).
 :- use_module(singleplayer_normal_difficulty).
 
 % Entry point for 2-player mode
@@ -65,31 +66,6 @@ game_loop_turn([CurrentPlayer | RemainingPlayers], Game) :-
             game_loop_turn([CurrentPlayer | RemainingPlayers], Game)
         )
     ).
-
-/*
-    prompt_two_moves(-Row1, -Col1, -Row2, -Col2)
-    Prompts the player to choose two valid moves.
-*/
-prompt_two_moves(Row1, Col1, Row2, Col2) :-
-    write('First move: '),
-    prompt_move(Row1, Col1),
-    write('Second move: '),
-    prompt_move(Row2, Col2).
-
-% Prompt for a single move
-prompt_move(Row, Col) :-
-    prompt_row(Row),
-    prompt_col(Col).
-
-% Prompt for row
-prompt_row(Row) :-
-    write('Choose the row (a-h): '),
-    read(Row).
-
-% Prompt for column
-prompt_col(Col) :-
-    write('Choose the column (1-8): '),
-    read(Col).
 
 /*
     demo/0

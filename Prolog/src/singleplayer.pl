@@ -6,6 +6,7 @@
           ]).
 
 :- use_module(grid).
+:- use_module(input_helpers).
 :- use_module(singleplayer_normal_difficulty).
 
 /* 
@@ -25,7 +26,7 @@ play_singleplayer :-
 game_loop(Game, Symbol) :-
     print_boards(Game, true),  % Dynamically print all boards
     format('~w Turn.~n', [Symbol]),
-    prompt_move(Row, Col),
+    prompt_move_singleplayer(Row, Col),
     (
         % Attempt to make the move
         pick_space(Row, Col, Symbol, Game, NewGame)
@@ -55,15 +56,3 @@ game_loop(Game, Symbol) :-
 
 next_symbol('X', 'O').
 next_symbol('O', 'X').
-
-prompt_move(Row, Col) :-
-    prompt_row(Row),
-    prompt_col(Col).
-
-prompt_row(Row) :-
-    write('Choose the row (a-f): '),
-    read(Row).
-
-prompt_col(Col) :-
-    write('Choose the column (1-6): '),
-    read(Col).

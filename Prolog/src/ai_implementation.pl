@@ -9,15 +9,15 @@
             simulate_move/3
           ]).
 
-:- use_module(grid).
-:- use_module(singleplayer_normal_difficulty).
 :- use_module(library(random)).
+:- use_module(grid).
+:- use_module(input_helpers).
+:- use_module(singleplayer_normal_difficulty).
 
 % Entry point for the Player vs Computer game
 play_player_vs_computer(Level) :-
     init_boards(2, GameState), % Initialize the game state
     write('Starting Player vs Computer Game!'), nl,
-    write('You are X and O, and the computer is X and O.'), nl,
     player_vs_computer_loop(GameState, 'player', Level).
 
 % Main loop for alternating turns between the player and the computer
@@ -54,6 +54,7 @@ player_vs_computer_loop(GameState, 'computer', Level) :- % Computer's turn
     ->  random_select(cell(Row1, Col1, '.'), ValidMoves, TempMoves),
         random_select(cell(Row2, Col2, '.'), TempMoves, _),
         format('Computer chose: (~w, ~w) and (~w, ~w)~n', [Row1, Col1, Row2, Col2]),
+        nl,
         pick_space(Row1, Col1, 'X', 1, GameState, TempGameState1),
         pick_space(Row1, Col1, 'X', 2, TempGameState1, TempGameState2),
         pick_space(Row2, Col2, 'O', 1, TempGameState2, TempGameState3),
@@ -103,10 +104,7 @@ find_valid_moves(GameState, ValidMoves) :-
         member(Col, Cols),
         get_symbol(GameState, 1, Row, Col, '.'), % Check if cell is empty on board 1
         get_symbol(GameState, 2, Row, Col, '.')  % Check if cell is empty on board 2
-    ), ValidMoves),
-    (ValidMoves = []
-    -> write('No valid moves found.'), nl
-    ;  format('Valid moves: ~w~n', [ValidMoves])).
+    ), ValidMoves).
 
 find_valid_moves(GameState, OpponentMoves, ValidMoves) :-
     default_rows(Rows),
@@ -117,10 +115,7 @@ find_valid_moves(GameState, OpponentMoves, ValidMoves) :-
         \+ member(cell(Row, Col, '.'), OpponentMoves), % Exclude opponent's moves
         get_symbol(GameState, 1, Row, Col, '.'),
         get_symbol(GameState, 2, Row, Col, '.')
-    ), ValidMoves),
-    (ValidMoves = []
-    -> write('No valid moves found.~n')
-    ;  format('Valid moves: ~w~n', [ValidMoves])).
+    ), ValidMoves).
 
 valid_move(GameState, Row, Col) :-
     get_symbol(GameState, 1, Row, Col, '.'),
@@ -135,23 +130,3 @@ valid_row_col(Row, Col) :-
 simulate_move(GameState, Row, Col, Score) :-
     pick_space(Row, Col, 'X', 1, GameState, NewGameState),
     calculate_player_score(NewGameState, 1, Score).
-
-% Prompts the player for two moves
-prompt_two_moves(Row1, Col1, Row2, Col2) :-
-    write('First move (X):'), nl,
-    prompt_move(Row1, Col1),
-    write('Second move (O):'), nl,
-    prompt_move(Row2, Col2).
-
-% Prompts the player for a row and column
-prompt_move(Row, Col) :-
-    prompt_row(Row),
-    prompt_col(Col).
-
-prompt_row(Row) :-
-    write('Choose the row (a-h): '),
-    read(Row).
-
-prompt_col(Col) :-
-    write('Choose the column (1-8): '),
-    read(Col).

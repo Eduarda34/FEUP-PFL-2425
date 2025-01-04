@@ -3,8 +3,9 @@
 ]).
 
 :- use_module(grid).
-:- use_module(singleplayer_normal_difficulty).
+:- use_module(input_helpers).
 :- use_module(ai_implementation).
+:- use_module(singleplayer_normal_difficulty).
 
 % Entry point for Computer vs Computer mode
 play_computer_vs_computer(Level) :-

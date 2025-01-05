@@ -1,3 +1,5 @@
+/* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
+                                                                                                                
 :- module(input_helpers,
           [ prompt_two_moves/4,
             prompt_move/2,

@@ -5,7 +5,8 @@
             singleplayer_game_over/2,
             update_player_score/3,
             multiplayer_game_over/3,
-            all_boards_full/1
+            all_boards_full/1,
+            calculate_player_score/3
           ]).
 
 :- use_module(grid).

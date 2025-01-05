@@ -1,3 +1,5 @@
+/* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
+
 :- module(computer_vs_computer, [
     play_computer_vs_computer/1
 ]).
@@ -22,35 +24,57 @@ computer_vs_computer_loop(GameState, [Player1ValidMoves, Player2ValidMoves], Cur
     print_boards(GameState, true),
     format('~w\'s turn!~n', [CurrentPlayer]),
     % Determine the current player and their moves
-    (CurrentPlayer = 'Computer 1' -> BoardID = 1, ValidMoves = Player1ValidMoves, OpponentMoves = Player2ValidMoves;
-     CurrentPlayer = 'Computer 2' -> BoardID = 2, ValidMoves = Player2ValidMoves, OpponentMoves = Player1ValidMoves),
+    ( CurrentPlayer = 'Computer 1' ->
+        ValidMoves = Player1ValidMoves,
+        OpponentMoves = Player2ValidMoves,
+        PlayerMarker1 = 'X',
+        PlayerMarker2 = 'O',
+        NextPlayer = 'Computer 2'
+    ; CurrentPlayer = 'Computer 2' ->
+        ValidMoves = Player2ValidMoves,
+        OpponentMoves = Player1ValidMoves,
+        PlayerMarker1 = 'X',
+        PlayerMarker2 = 'O',
+        NextPlayer = 'Computer 1'
+    ),
 
     % Check if the current player has valid moves
-    (ValidMoves \= []
+    ( ValidMoves \= []
     ->  % Make two moves
         random_select(cell(Row1, Col1, '.'), ValidMoves, TempMoves),
         random_select(cell(Row2, Col2, '.'), TempMoves, RemainingMoves),
         format('~w chose: (~w, ~w) and (~w, ~w)~n', [CurrentPlayer, Row1, Col1, Row2, Col2]),
-        pick_space(Row1, Col1, 'X', BoardID, GameState, TempGameState1),
-        pick_space(Row2, Col2, 'O', BoardID, TempGameState1, NewGameState),
 
-        % Update the valid move lists
+        % Apply moves to both boards
+        pick_space(Row1, Col1, PlayerMarker1, 1, GameState, TempGameState1),
+        pick_space(Row1, Col1, PlayerMarker1, 2, TempGameState1, TempGameState2),
+        pick_space(Row2, Col2, PlayerMarker2, 1, TempGameState2, TempGameState3),
+        pick_space(Row2, Col2, PlayerMarker2, 2, TempGameState3, NewGameState),
+
+        % Remove used cells from both lists
+        exclude(==(cell(Row1, Col1, '.')), OpponentMoves, OppMovesAfterFirst),
+        exclude(==(cell(Row2, Col2, '.')), OppMovesAfterFirst, UpdatedOpponentMoves),
         exclude(==(cell(Row1, Col1, '.')), RemainingMoves, UpdatedMoves1),
-        exclude(==(cell(Row2, Col2, '.')), UpdatedMoves1, UpdatedValidMoves),
-        (CurrentPlayer = 'Computer 1'
-        -> NewMoveLists = [UpdatedValidMoves, OpponentMoves], NextPlayer = 'Computer 2';
-           NewMoveLists = [OpponentMoves, UpdatedValidMoves], NextPlayer = 'Computer 1'),
+        exclude(==(cell(Row2, Col2, '.')), UpdatedMoves1, UpdatedCurrentMoves),
 
-        % Check game status or continue
-        (multiplayer_game_over(NewGameState, [player('Computer 1', 1, 0), player('Computer 2', 2, 0)], Winner)
+        % Reassign the updated move lists
+        ( CurrentPlayer = 'Computer 1' ->
+            NewMoveLists = [UpdatedCurrentMoves, UpdatedOpponentMoves]
+        ; CurrentPlayer = 'Computer 2' ->
+            NewMoveLists = [UpdatedOpponentMoves, UpdatedCurrentMoves]
+        ),
+
+        % Check if game is over or continue
+        ( multiplayer_game_over(NewGameState, [player('Computer 1', 1, 0), player('Computer 2', 2, 0)], Winner)
         ->  Winner = player(WinnerName, _, WinnerScore),
-            print_boards(NewGameState, true),  % Print the final state of the boards
+            print_boards(NewGameState, true),  % Print final state of the boards
             format('Game over! ~w wins with a score of ~w!~n', [WinnerName, WinnerScore])
-        ;   computer_vs_computer_loop(NewGameState, NewMoveLists, NextPlayer, Level))
+        ;   computer_vs_computer_loop(NewGameState, NewMoveLists, NextPlayer, Level)
+        )
     ;   % No valid moves for current player
         write(CurrentPlayer), write(' has no valid moves. Skipping turn.'), nl,
-        (CurrentPlayer = 'Computer 1' -> NextPlayer = 'Computer 2'; NextPlayer = 'Computer 1'),
-        computer_vs_computer_loop(GameState, [Player1ValidMoves, Player2ValidMoves], NextPlayer, Level)).
+        computer_vs_computer_loop(GameState, [Player1ValidMoves, Player2ValidMoves], NextPlayer, Level)
+    ).
 
 % exclude(+Goal, +List, -Filtered)
 % Removes elements from List that satisfy Goal, returning the remaining elements in Filtered.
@@ -60,15 +84,4 @@ exclude(Goal, [H|T], Filtered) :-
     ->  exclude(Goal, T, Filtered)
     ;   Filtered = [H|Rest],
         exclude(Goal, T, Rest)
-    ).
-
-check_game_status(GameState, CurrentPlayer, Level) :-
-    (   multiplayer_game_over(GameState, [player('Player 1', 1, 0), player('Player 2', 2, 0)], Winner)
-    ->  Winner = player(Name, _, Score),
-        print_boards(GameState, true),
-        format('Game over! ~w wins with the fewest lines and squares, score: ~w!~n', [Name, Score])
-    ;   (\+ all_boards_full(GameState)
-        ->  (CurrentPlayer = 'player' -> NextPlayer = 'computer'; NextPlayer = 'player'),
-            player_vs_computer_loop(GameState, NextPlayer, Level)
-        ;   write('Game ended in a draw!'), nl)
     ).

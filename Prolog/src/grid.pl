@@ -16,7 +16,7 @@
 
 :- use_module(library(random)).
 :- use_module(library(lists)).
-:- use_module(singleplayer_normal_difficulty).
+:- use_module(validation).
 
 /*
    cell(BoardID, RowLabel, ColLabel, Symbol).

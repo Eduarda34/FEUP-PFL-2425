@@ -1,6 +1,6 @@
 /* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
-:- module(singleplayer_normal_difficulty,
+:- module(validation,
           [ valid_cell/3,
             singleplayer_game_over/2,
             update_player_score/3,
@@ -216,7 +216,6 @@ calculate_player_score(Game, BoardID, Score) :-
     length(VerticalScores, VCount),
     length(DiagonalScores, DCount),
     length(SquareScores, SCount),
-    format('Horizontal: ~w, Vertical: ~w, Diagonal: ~w, Squares: ~w~n', [HCount, VCount, DCount, SCount]),
     % Total score
     length(AllScores, Score).
 

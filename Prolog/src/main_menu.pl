@@ -1,11 +1,17 @@
 /* -*- Mode:Prolog; coding:utf-8; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 
-:- use_module(singleplayer).
+:- module(main_menu, [
+    main_menu/0
+]).
+
+:- use_module(game).
+:- use_module(grid).
+:- use_module(validation).
 :- use_module(multiplayer).
+:- use_module(singleplayer).
+:- use_module(input_helpers).
 :- use_module(ai_implementation).
 :- use_module(computer_vs_computer).
-
-c :- consult('/home/miguelvalente/Documents/Faculdade/FEUP-PFL-2425/Prolog/src/main_menu.pl').
 
 % Main Menu
 main_menu :-
@@ -13,7 +19,9 @@ main_menu :-
     write('1. Singleplayer'), nl,  % Updated to display a submenu
     write('2. Multiplayer'), nl,
     write('3. Instructions'), nl,
-    write('4. Exit'), nl,
+    write('4. Load Intermediate Demo State'), nl,
+    write('5. Load Ending Demo State'), nl,
+    write('6. Exit'), nl,
     write('Choose an option: '),
     read(Option),
     handle_option(Option).
@@ -22,7 +30,15 @@ main_menu :-
 handle_option(1) :- singleplayer_menu.
 handle_option(2) :- multiplayer_menu.
 handle_option(3) :- display_instructions.
-handle_option(4) :- write('Exiting the game...'), nl.
+handle_option(4) :-
+    game:load_demo_state(GameState),
+    write('Demo state loaded. Use this state to demonstrate functionality.'), nl,
+    play_with_state(GameState).
+handle_option(5) :-
+    game:ending_state(GameState),
+    game:closer_ending_state_rule,
+    play_with_state(GameState).
+handle_option(6) :- write('Exiting the game...'), nl.
 handle_option(_) :-
     write('Invalid option, try again.'), nl,
     main_menu.

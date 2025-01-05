@@ -14,7 +14,7 @@
 :- use_module(library(random)).
 :- use_module(grid).
 :- use_module(input_helpers).
-:- use_module(singleplayer_normal_difficulty).
+:- use_module(validation).
 
 other_player('computer', 'player').
 other_player('player', 'computer').

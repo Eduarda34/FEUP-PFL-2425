@@ -4,13 +4,13 @@
           [ 
             play_multiplayer/0,
             play_three_player/0,
-            prompt_two_moves/4
+            game_loop_turn/2
           ]).
 
 :- use_module(library(lists)).
 :- use_module(grid).
 :- use_module(input_helpers).
-:- use_module(singleplayer_normal_difficulty).
+:- use_module(validation).
 
 % Entry point for 2-player mode
 play_multiplayer :-
@@ -66,7 +66,6 @@ game_loop_turn([CurrentPlayer | RemainingPlayers], Game) :-
             game_loop_turn([CurrentPlayer | RemainingPlayers], Game)
         )
     ).
-
 
 /*
     demo/0

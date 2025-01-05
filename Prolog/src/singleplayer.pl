@@ -7,7 +7,7 @@
 
 :- use_module(grid).
 :- use_module(input_helpers).
-:- use_module(singleplayer_normal_difficulty).
+:- use_module(validation).
 
 /* 
     Predicado principal para iniciar o jogo.

@@ -9,7 +9,13 @@
 :- use_module(ai_implementation).
 :- use_module(validation).
 
-% Entry point for Computer vs Computer mode
+/*
+    play_computer_vs_computer(+Level)
+    Entry point for Computer vs Computer mode.
+    - Level: Difficulty level for the computer players (e.g., Easy, Medium, Hard).
+    - Initializes the game state with 2 boards and valid moves for each computer.
+    - Starts the game loop alternating between "Computer 1" and "Computer 2."
+*/
 play_computer_vs_computer(Level) :-
     init_boards(2, GameState),
     default_rows(Rows), default_cols(Cols),
@@ -18,7 +24,15 @@ play_computer_vs_computer(Level) :-
     write('Computer 1: Player 1 | Computer 2: Player 2'), nl,
     computer_vs_computer_loop(GameState, [AllValidMoves, AllValidMoves], 'Computer 1', Level).
 
-% Game loop alternating turns between two computers
+/*
+    computer_vs_computer_loop(+GameState, +ValidMovesList, +CurrentPlayer, +Level)
+    Handles the game loop for Computer vs Computer mode.
+    - GameState: Current state of the game.
+    - ValidMovesList: A list of valid moves for both computers.
+    - CurrentPlayer: The computer whose turn it is ('Computer 1' or 'Computer 2').
+    - Level: Difficulty level for the computer players.
+    - Alternates turns between computers, applies moves, and checks for game-over conditions.
+*/
 computer_vs_computer_loop(GameState, [Player1ValidMoves, Player2ValidMoves], CurrentPlayer, Level) :-
     % Print the boards at the start of each turn
     print_boards(GameState, true),
@@ -76,8 +90,13 @@ computer_vs_computer_loop(GameState, [Player1ValidMoves, Player2ValidMoves], Cur
         computer_vs_computer_loop(GameState, [Player1ValidMoves, Player2ValidMoves], NextPlayer, Level)
     ).
 
-% exclude(+Goal, +List, -Filtered)
-% Removes elements from List that satisfy Goal, returning the remaining elements in Filtered.
+/*
+    exclude(+Goal, +List, -Filtered)
+    Removes elements from List that satisfy Goal, returning the remaining elements in Filtered.
+    - Goal: Predicate to test elements for exclusion.
+    - List: Original list of elements.
+    - Filtered: Resulting list after excluding elements matching the Goal.
+*/
 exclude(_, [], []).
 exclude(Goal, [H|T], Filtered) :-
     (   call(Goal, H)

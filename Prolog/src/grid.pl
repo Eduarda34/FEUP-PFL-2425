@@ -20,28 +20,29 @@
 
 /*
    cell(BoardID, RowLabel, ColLabel, Symbol).
-   Exemplo: cell(1, a, 1, '.') => Tabuleiro #1 na posição (A,1) contém '.'.
+   Example: cell(1, a, 1, '.') => Board #1 at position (A,1) contains '.'.
 
-   board2_rows e board2_cols são gerenciados na estrutura de estado.
+   board2_rows and board2_cols are managed in the state structure.
 */
 
 /* 
-   Representação do Estado do Jogo:
+   Representation of the Game State:
    game(Board1, Board2, Board3)
 
    Board:
    board(BoardID, Rows, Cols, Cells)
 
-   Cells é uma lista de cell(Row, Col, Symbol).
-*/
+   Cells is a list of cell(Row, Col, Symbol).
+*/ 
 
 singleplayer_rows([a,b,c,d,e,f]).
 singleplayer_cols([1,2,3,4,5,6]).
 default_rows([a,b,c,d,e,f,g,h]).
 default_cols([1,2,3,4,5,6,7,8]).
 
-%% random_shuffled_list(+List, -Shuffled)
-%% Shuffles List using random_select/3.
+
+% random_shuffled_list(+List, -Shuffled)
+% Shuffles List using random_select/3.
 random_shuffled_list([], []).
 random_shuffled_list(List, [X|Xs]) :-
     random_select(X, List, Rest),
@@ -72,7 +73,9 @@ init_boards(game(Board1, Board2)) :-
     initialize_cells(ShuffledRows2, ShuffledCols2, Cells2),
     Board2 = board(2, ShuffledRows2, ShuffledCols2, Cells2).
 
-init_boards(2, game(Board1, Board2)) :- % For 2-player mode
+%% init_boards(-Mode,-State)
+%% Initializes the game state with either two or three boards.
+init_boards(2, game(Board1, Board2)) :-
     default_rows(AllRows),
     default_cols(AllCols),
 
@@ -88,7 +91,9 @@ init_boards(2, game(Board1, Board2)) :- % For 2-player mode
     initialize_cells(ShuffledRows2, ShuffledCols2, Cells2),
     Board2 = board(2, ShuffledRows2, ShuffledCols2, Cells2).
 
-init_boards(3, game(Board1, Board2, Board3)) :- % For 3-player mode
+%% init_boards(-Mode,-State)
+%% Initializes the game state with either two or three boards.
+init_boards(3, game(Board1, Board2, Board3)) :-
     default_rows(AllRows),
     default_cols(AllCols),
 
@@ -246,23 +251,29 @@ print_col_header(Cols) :-
     write('  '),
     print_separator(Cols),
     nl.
-
-%% print_cols(+Cols)
-%% Prints column names with spacing.
+/*
+   print_cols(+Cols)
+   Prints column names with spacing.
+*/
 print_cols([]).
 print_cols([C|Cs]) :-
     format(' ~w ', [C]),
     print_cols(Cs).
 
-%% print_separator(+Cols)
-%% Prints a separator line under the column header.
+/*
+   print_separator(+Cols)
+   Prints a separator line under the column header.
+*/
 print_separator([]).
 print_separator([_|Cs]) :-
     write('---'),
     print_separator(Cs).
 
-%% print_rows(+Rows, +Cols, +Cells)
-%% Prints each row of the board.
+/*
+   print_rows(+Rows, +Cols, +Cells)
+   Prints each row of the board.
+   
+*/
 print_rows([], _, _).
 print_rows([R|Rs], Cols, Cells) :-
     format('~w |', [R]),
@@ -270,8 +281,10 @@ print_rows([R|Rs], Cols, Cells) :-
     nl,
     print_rows(Rs, Cols, Cells).
 
-%% print_cells(+Row, +Cols, +Cells)
-%% Prints the cells in a specific row.
+/*
+   print_cells(+Row, +Cols, +Cells)
+   Prints the cells in a specific row.
+*/
 print_cells(_, [], _).
 print_cells(Row, [C|Cs], Cells) :-
     (   member(cell(Row, C, Symbol), Cells)

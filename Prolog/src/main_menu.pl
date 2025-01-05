@@ -13,7 +13,10 @@
 :- use_module(ai_implementation).
 :- use_module(computer_vs_computer).
 
-% Main Menu
+/*
+    main_menu/0
+    Displays the main menu and handles user input to navigate through options.
+*/
 main_menu :-
     write('==== MENU ===='), nl,
     write('1. Singleplayer'), nl,  % Updated to display a submenu
@@ -26,7 +29,11 @@ main_menu :-
     read(Option),
     handle_option(Option).
 
-% Handle top-level menu options
+/*
+    handle_option(+Option)
+    Handles the user's choice from the main menu.
+    - Option: The user's input corresponding to the chosen menu option.
+*/
 handle_option(1) :- singleplayer_menu.
 handle_option(2) :- multiplayer_menu.
 handle_option(3) :- display_instructions.
@@ -43,7 +50,10 @@ handle_option(_) :-
     write('Invalid option, try again.'), nl,
     main_menu.
 
-% Singleplayer Menu
+/*
+    singleplayer_menu/0
+    Displays the singleplayer submenu and handles user input to select game modes.
+*/
 singleplayer_menu :-
     write('==== SINGLEPLAYER ===='), nl,
     write('1. Classic Singleplayer'), nl,
@@ -53,6 +63,11 @@ singleplayer_menu :-
     read(Choice),
     handle_singleplayer_choice(Choice).
 
+/*
+    handle_singleplayer_choice(+Choice)
+    Handles the user's choice from the singleplayer submenu.
+    - Choice: The user's input corresponding to the chosen singleplayer mode.
+*/
 handle_singleplayer_choice(1) :- % Classic singleplayer
     play_singleplayer.
 
@@ -76,7 +91,10 @@ handle_singleplayer_choice(_) :-
     write('Invalid option, returning to the main menu.'), nl,
     main_menu.
 
-% Multiplayer Menu
+/*
+    multiplayer_menu/0
+    Displays the multiplayer submenu and handles user input to select the number of players.
+*/
 multiplayer_menu :-
     write('==== MULTIPLAYER ===='), nl,
     write('1. 2 Players'), nl,
@@ -85,6 +103,11 @@ multiplayer_menu :-
     read(Choice),
     handle_multiplayer_choice(Choice).
 
+/*
+    handle_multiplayer_choice(+Choice)
+    Handles the user's choice from the multiplayer submenu.
+    - Choice: The user's input corresponding to the chosen multiplayer mode.
+*/
 handle_multiplayer_choice(1) :- % 2-player mode
     play_multiplayer.
 
@@ -95,7 +118,11 @@ handle_multiplayer_choice(_) :-
     write('Invalid option, returning to the main menu.'), nl,
     main_menu.
 
-% Display instructions
+/*
+    display_instructions/0
+    Displays the game instructions to the user.
+    Returns to the main menu after the user presses a key.
+*/
 display_instructions :-
     write('==== INSTRUCTIONS ===='), nl,
     write('--> Take turns placing symbols (X or O) on the grid.'), nl,

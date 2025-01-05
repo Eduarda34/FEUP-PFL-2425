@@ -9,8 +9,9 @@
 :- use_module(input_helpers).
 :- use_module(validation).
 
-/* 
-    Predicado principal para iniciar o jogo.
+/*
+    play_singleplayer/0
+    Starts the single-player game mode. Initializes the game state and manages the game loop.
 */
 play_singleplayer :-
     init_boards(Game), 
@@ -19,9 +20,14 @@ play_singleplayer :-
     nl,
     game_loop(Game, 'X').
 
-/* 
-    Loop principal do jogo.
+/*
     game_loop(+GameState, +CurrentSymbol)
+    Manages the game loop for single-player mode.
+    - Displays the boards.
+    - Prompts the player for a move.
+    - Updates the game state.
+    - Checks for win, loss, or continuation conditions.
+    - Alternates between symbols ('X' and 'O') until the game ends.
 */
 game_loop(Game, Symbol) :-
     print_boards(Game, true),  % Dynamically print all boards
@@ -54,5 +60,10 @@ game_loop(Game, Symbol) :-
         game_loop(Game, Symbol)
     ).
 
+
+/*
+    next_symbol(+CurrentSymbol, -NextSymbol)
+    Alternates between 'X' and 'O' for the next turn.
+*/
 next_symbol('X', 'O').
 next_symbol('O', 'X').

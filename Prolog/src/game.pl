@@ -97,7 +97,6 @@ value(GameState, Player, Value) :-
 move_choose(GameState, Level, Move) :-
     choose_move(GameState, Level, Move).
 
-% Intermediate game state for demonstration
 intermediate_state(game(
     board(1, [a, b, c, d, e, f, g, h], [1, 2, 3, 4, 5, 6, 7, 8], [
         cell(a, 1, 'X'), cell(a, 2, 'O'), cell(a, 3, 'X'), cell(a, 4, 'O'), cell(a, 5, 'X'), cell(a, 6, 'O'), cell(a, 7, 'X'), cell(a, 8, 'O'),
@@ -121,7 +120,7 @@ intermediate_state(game(
     ])
 )).
 
-% Ending game state for demonstration
+
 ending_state(game(
     board(1, [a, b, c, d, e, f, g, h], [1, 2, 3, 4, 5, 6, 7, 8], [
         cell(a, 1, 'X'), cell(a, 2, 'O'), cell(a, 3, 'X'), cell(a, 4, 'O'), cell(a, 5, 'X'), cell(a, 6, 'O'), cell(a, 7, 'X'), cell(a, 8, 'O'),
@@ -145,16 +144,30 @@ ending_state(game(
     ])
 )).
 
-% Rule for closer ending state progression
+/*
+    closer_ending_state_rule/0
+    Displays instructions for progressing towards the closer ending state.
+    Specifies the cells to fill on both boards to reach this state.
+*/
 closer_ending_state_rule :-
     write('To finish the game, fill the following cells:'), nl,
     write('- (d, 7) on both boards'), nl,
     write('- (f, 6) on both boards'), nl.
 
-% Predicate to load a demo state
+
+/*
+    load_demo_state(-GameState)
+    Loads a predefined intermediate demo state into the game.
+    - GameState: The loaded intermediate state of the game.
+*/
 load_demo_state(GameState) :-
     intermediate_state(GameState).
 
+/*
+    play_with_state(+GameState)
+    Starts the game using the provided demo state.
+    - GameState: The initial state of the game for demonstration purposes.
+*/
 play_with_state(GameState) :-
     write('Starting game with demo state...'), nl,
     game_loop_turn([player(1, 1, 0), player(2, 2, 0)], GameState).

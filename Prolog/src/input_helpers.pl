@@ -10,38 +10,60 @@
             prompt_col_singleplayer/1
           ]).
 
-% Prompt for two moves (row and column for each)
+/*
+   prompt_two_moves(-Row1, -Col1, -Row2, -Col2)
+   Prompts the user for two moves: the first move (X) and the second move (O),
+   each consisting of a row and a column.
+ */
 prompt_two_moves(Row1, Col1, Row2, Col2) :-
     write('First move (X):'), nl,
     prompt_move(Row1, Col1),
     write('Second move (O):'), nl,
     prompt_move(Row2, Col2).
 
-% Prompt for a single move (row and column)
+/*
+   prompt_move(-Row, -Col)
+   Prompts the user for a single move by requesting the row and column separately.
+ */
 prompt_move(Row, Col) :-
     prompt_row(Row),
     prompt_col(Col).
-
-% Prompt for row
+/*
+   prompt_row(-Row)
+   Prompts the user to select a row (a-h) and reads the input. (For multiplayer boards).
+ */
 prompt_row(Row) :-
     write('Choose the row (a-h): '),
     read(Row).
 
-% Prompt for column
+/*
+   prompt_col(-Col)
+   Prompts the user to select a column (1-8) and reads the input. (For multiplayer boards).
+ */
 prompt_col(Col) :-
     write('Choose the column (1-8): '),
     read(Col),
     nl.
 
-% Prompt for a single move in singleplayer (row and column)
+/*
+   prompt_move_singleplayer(-Row, -Col)
+   Prompts the user for a single move in single-player mode by requesting the row and column separately.
+*/
 prompt_move_singleplayer(Row, Col) :-
     prompt_row_singleplayer(Row),
     prompt_col_singleplayer(Col).
 
+/*
+   prompt_row_singleplayer(-Row)
+   Prompts the user to select a row (a-f) and reads the input.
+*/
 prompt_row_singleplayer(Row) :-
     write('Choose the row (a-f): '),
     read(Row).
-
+/*
+   prompt_col_singleplayer(-Col)
+   Prompts the user to select a column (1-6) and reads the input.
+*/
 prompt_col_singleplayer(Col) :-
     write('Choose the column (1-6): '),
     read(Col).

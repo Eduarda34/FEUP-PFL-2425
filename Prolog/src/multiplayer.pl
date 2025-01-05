@@ -12,16 +12,26 @@
 :- use_module(input_helpers).
 :- use_module(validation).
 
-% Entry point for 2-player mode
+/*
+    play_multiplayer/0
+    Entry point for 2-player mode.
+    - Initializes the game with 2 boards.
+    - Starts the game loop with two players, each associated with their own board and initial score of 0.
+*/
 play_multiplayer :-
-    init_boards(2, Game), % Initialize game with 2 boards
+    init_boards(2, Game),
     write('Welcome to 2-Player Mode!'), nl,
     nl,
     game_loop_turn([player(1, 1, 0), player(2, 2, 0)], Game).
 
-% Entry point for 3-player mode
+/*
+    play_three_player/0
+    Entry point for 3-player mode.
+    - Initializes the game with 3 boards.
+    - Starts the game loop with three players, each associated with their own board and initial score of 0.
+*/
 play_three_player :-
-    init_boards(3, Game), % Initialize game with 3 boards
+    init_boards(3, Game),
     write('Welcome to 3-Player Mode!'), nl,
     nl,
     game_loop_turn([player(1, 1, 0), player(2, 2, 0), player(3, 3, 0)], Game).

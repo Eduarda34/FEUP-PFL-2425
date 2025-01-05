@@ -98,9 +98,9 @@ handle_multiplayer_choice(_) :-
 % Display instructions
 display_instructions :-
     write('==== INSTRUCTIONS ===='), nl,
-    write('--> Singleplayer Classic: Play against yourself by alternating turns.'), nl,
-    write('--> Player vs Computer: Compete against the computer with different difficulty levels.'), nl,
-    write('--> Multiplayer: Play against other players (2 or 3 players).'), nl,
+    write('--> Take turns placing symbols (X or O) on the grid.'), nl,
+    write('--> The player with less consecutive symbols in a row, column, diagonal or squares wins.'), nl,
+    write('--> Ensure no invalid moves are made.'), nl,
     write('Press any key to return to the main menu.'), nl,
     get_char(_),
     get_char(_),

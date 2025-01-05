@@ -67,6 +67,7 @@ game_loop_turn([CurrentPlayer | RemainingPlayers], Game) :-
         )
     ).
 
+
 /*
     demo/0
     Executes a sequence of example moves and displays the score.

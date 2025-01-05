@@ -103,8 +103,7 @@ choose_move(GameState, 2, Move) :- % Level 2: Greedy best move
 
 % choose_move(+GameState, +Level, -Move)
 choose_move(GameState, 3, Move) :- 
-    % Pick a search depth that you want. Let's say we use Depth = 2 or 3 for demonstration.
-    Depth = 2,
+    Depth = 10,
     CurrentPlayer = computer, 
     minimax_decision(GameState, Depth, CurrentPlayer, Move).
 

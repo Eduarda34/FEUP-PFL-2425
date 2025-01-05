@@ -44,6 +44,7 @@ handle_singleplayer_choice(2) :- % Player vs Computer
     write('Choose difficulty level for the computer:'), nl,
     write('1. Easy'), nl,
     write('2. Medium'), nl,
+    write('3. Hard'), nl,
     read(Level),
     play_player_vs_computer(Level).
 

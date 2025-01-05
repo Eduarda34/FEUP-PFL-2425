@@ -14,7 +14,9 @@ Miguel Ângelo Pacheco Valente - up201704608 --> 33.3%
 
 
 ## Installation and Execution:
-To run the game in Linux you need to consult the game.pl file (consult('path/to/game.pl').) and then run "play." in the console
+To run the game in Linux you need to consult the game.pl file (consult('path/to/game.pl').) and then run "play." in the console.
+
+To run the game in Windows, open SICStus Prolog, Select the "File" option, then "Consult", go to the path of the file game.pl, choose the file game.pl and then run "play." in the SICStus console.
 
 
 ## Description of the game:

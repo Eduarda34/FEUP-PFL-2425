@@ -98,7 +98,7 @@ move_choose(GameState, Level, Move) :-
     choose_move(GameState, Level, Move).
 
 intermediate_state(game(
-    board(1, [a, b, c, d, e, f, g, h], [1, 2, 3, 4, 5, 6, 7, 8], [
+    board(1, [a, c, b, h, e, f, g, d], [1, 2, 3, 4, 5, 6, 7, 8], [
         cell(a, 1, 'X'), cell(a, 2, 'O'), cell(a, 3, 'X'), cell(a, 4, 'O'), cell(a, 5, 'X'), cell(a, 6, 'O'), cell(a, 7, 'X'), cell(a, 8, 'O'),
         cell(b, 1, 'O'), cell(b, 2, 'X'), cell(b, 3, 'O'), cell(b, 4, 'X'), cell(b, 5, 'O'), cell(b, 6, 'X'), cell(b, 7, 'O'), cell(b, 8, 'X'),
         cell(c, 1, '.'), cell(c, 2, 'O'), cell(c, 3, 'X'), cell(c, 4, 'O'), cell(c, 5, 'X'), cell(c, 6, 'O'), cell(c, 7, 'X'), cell(c, 8, 'O'),
@@ -122,7 +122,7 @@ intermediate_state(game(
 
 
 ending_state(game(
-    board(1, [a, b, c, d, e, f, g, h], [1, 2, 3, 4, 5, 6, 7, 8], [
+    board(1, [f, b, h, d, e, a, g, c], [1, 5, 3, 7, 2, 6, 4, 8], [
         cell(a, 1, 'X'), cell(a, 2, 'O'), cell(a, 3, 'X'), cell(a, 4, 'O'), cell(a, 5, 'X'), cell(a, 6, 'O'), cell(a, 7, 'X'), cell(a, 8, 'O'),
         cell(b, 1, 'O'), cell(b, 2, 'X'), cell(b, 3, 'O'), cell(b, 4, 'X'), cell(b, 5, 'O'), cell(b, 6, 'X'), cell(b, 7, 'O'), cell(b, 8, 'X'),
         cell(c, 1, 'X'), cell(c, 2, 'O'), cell(c, 3, 'X'), cell(c, 4, 'O'), cell(c, 5, 'X'), cell(c, 6, 'O'), cell(c, 7, 'X'), cell(c, 8, 'O'),
